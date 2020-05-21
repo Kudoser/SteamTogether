@@ -28,7 +28,11 @@ namespace SteamTogether
                 }
 
                 var client = new Client(steamApiKey);
-                var steamIds = _config.GetSection("Users").Get<List<long>>();
+                var steamIds = _config
+                    .GetSection("Users").Get<List<long>>()
+                    .Distinct()
+                    .ToList();
+                
                 var filterCount = _config.GetSection("fullEqual").Get<bool>()
                     ? steamIds.Count
                     : _config.GetSection("FilterCount").Get<int>();
