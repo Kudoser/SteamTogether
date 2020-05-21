@@ -102,7 +102,7 @@ namespace SteamTogether
             }
 
             var filterCount = _config.GetSection("FilterCount").Get<int>();
-            if (usersCount <= filterCount)
+            if (usersCount < filterCount)
             {
                 throw new ArgumentException("key[FilterCount] -> Filter count should be > than amount of user ids");
             }
