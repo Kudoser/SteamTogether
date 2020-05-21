@@ -25,6 +25,7 @@ How to run
 * SteamDevKey ``take your key here https://steamcommunity.com/dev/apikey``
 * FilterCount `` define numbers of intersections below this value``
 * Users ``the array of user steam ids with whom you want to find intersections``
+* fullEqual ``outputs only those games which owned by every player, if true then ignores FilterCount``
 
 
 ## Dependencies

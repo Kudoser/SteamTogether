@@ -29,6 +29,9 @@ namespace SteamTogether
 
                 var client = new Client(steamApiKey);
                 var steamIds = _config.GetSection("Users").Get<List<long>>();
+                var filterCount = _config.GetSection("fullEqual").Get<bool>()
+                    ? steamIds.Count
+                    : _config.GetSection("FilterCount").Get<int>();
 
                 Console.WriteLine("Getting data..");
 
@@ -56,7 +59,7 @@ namespace SteamTogether
                                 NickNames = names
                             };
                         })
-                    .Where(x => x.NickNames.Count() >= _config.GetSection("FilterCount").Get<int>())
+                    .Where(x => x.NickNames.Count() >= filterCount)
                     .OrderByDescending(x => x.NickNames.Count());
 
                 if (!games.Any()) Console.WriteLine("There are no intersections among owned games");
