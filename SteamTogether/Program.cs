@@ -17,18 +17,21 @@ namespace SteamTogether
             Console.WriteLine("Loading..");
             LoadConfiguration();
 
-            var steamApiKey = _config["SteamDevKey"];
-            if (string.IsNullOrEmpty(steamApiKey))
-            {
-                throw new ArgumentException("SteamDevKey should be set");
-            }
-
-            var client = new Client(steamApiKey);
-            var steamIds = _config.GetSection("users").Get<List<long>>();
-
-            Console.WriteLine("Getting data..");
             try
             {
+                ValidateConfiguration();
+
+                var steamApiKey = _config["SteamDevKey"];
+                if (string.IsNullOrEmpty(steamApiKey))
+                {
+                    throw new ArgumentException("SteamDevKey should be set");
+                }
+
+                var client = new Client(steamApiKey);
+                var steamIds = _config.GetSection("Users").Get<List<long>>();
+
+                Console.WriteLine("Getting data..");
+
                 var players = await client.GetUsersInfo(steamIds);
                 var games = players
                     .SelectMany(x => x.Value.OwnedGames)
@@ -83,6 +86,26 @@ namespace SteamTogether
                 .AddJsonFile("appsettings.json")
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .Build();
+        }
+
+        private static void ValidateConfiguration()
+        {
+            if (string.IsNullOrEmpty(_config["SteamDevKey"]))
+            {
+                throw new ArgumentException("key[SteamDevKey] should be set");
+            }
+
+            var usersCount = _config.GetSection("Users").Get<List<long>>().Count;
+            if (usersCount < 2)
+            {
+                throw new ArgumentException("key[Users] -> set at least 2 user ids");
+            }
+
+            var filterCount = _config.GetSection("FilterCount").Get<int>();
+            if (usersCount <= filterCount)
+            {
+                throw new ArgumentException("key[FilterCount] -> Filter count should be > than amount of user ids");
+            }
         }
     }
 }
