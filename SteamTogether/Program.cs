@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace SteamTogether
                     .GetSection("Users").Get<List<long>>()
                     .Distinct()
                     .ToList();
-                
+
                 var filterCount = _config.GetSection("fullEqual").Get<bool>()
                     ? steamIds.Count
                     : _config.GetSection("FilterCount").Get<int>();
@@ -66,11 +66,34 @@ namespace SteamTogether
                     .Where(x => x.NickNames.Count() >= filterCount)
                     .OrderByDescending(x => x.NickNames.Count());
 
-                if (!games.Any()) Console.WriteLine("There are no intersections among owned games");
-                foreach (var game in games)
+                if (!games.Any())
                 {
-                    Console.WriteLine(
-                        $"{game.Name}, count: {game.NickNames.Count()} ({string.Join(",", game.NickNames)})");
+                    Console.WriteLine("There are no intersections among owned games");
+                } else {
+                    var nameHeader = "Name";
+                    var countHeader = "Count";
+                    var playersHeader = "Players";
+
+                    var nameLength = nameHeader.Length;
+                    var countLength = countHeader.Length;
+                    var playersLength = playersHeader.Length;
+
+                    foreach (var game in games)
+                    {
+                        nameLength = Math.Max(nameLength, game.Name.Length);
+                        playersLength = Math.Max(playersLength, String.Join(", ", game.NickNames).Length);
+                    }
+
+                    var templateString = $"| {{0,-{nameLength}}} | {{1,{countLength}}} | {{2,-{playersLength}}} |";
+                    var tableBorder = $"+{new String('=', nameLength + 2)}+{new String('=', countLength + 2)}+{new String('=', playersLength + 2)}+";
+                    Console.WriteLine(tableBorder);
+                    Console.WriteLine(templateString, nameHeader, countHeader, playersHeader);
+                    Console.WriteLine(tableBorder);
+                    foreach (var game in games)
+                    {
+                        Console.WriteLine(templateString, game.Name, game.NickNames.Count(), String.Join(", ", game.NickNames));
+                    }
+                    Console.WriteLine(tableBorder);
                 }
             }
             catch (Exception e)
