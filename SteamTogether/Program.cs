@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,7 +32,7 @@ namespace SteamTogether
                     .GetSection("Users").Get<List<long>>()
                     .Distinct()
                     .ToList();
-                
+
                 var filterCount = _config.GetSection("fullEqual").Get<bool>()
                     ? steamIds.Count
                     : _config.GetSection("FilterCount").Get<int>();
@@ -70,7 +70,7 @@ namespace SteamTogether
                 foreach (var game in games)
                 {
                     Console.WriteLine(
-                        $"{game.Name}, count: {game.NickNames.Count()} ({string.Join(",", game.NickNames)})");
+                        $"{game.Name}, count: {game.NickNames.Count()} ({string.Join(", ", game.NickNames)})");
                 }
             }
             catch (Exception e)
