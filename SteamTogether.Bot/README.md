@@ -1,6 +1,6 @@
 # SteamTogether.Bot
 
-A simple telegram bot to find games to play with friends 
+A simple telegram bot based on [Telegram bot](https://github.com/TelegramBots/Telegram.Bot) to find games to play with friends 
 
 ## How it works
 
