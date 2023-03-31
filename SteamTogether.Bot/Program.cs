@@ -22,7 +22,6 @@ var host = Host.CreateDefaultBuilder()
             .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
             {
                 var opts = sp.GetService<IOptions<TelegramOptions>>();
-                Console.WriteLine(opts.Value.Token);
                 var telegramOpts = new TelegramBotClientOptions(opts.Value.Token);
                 return new TelegramBotClient(telegramOpts, httpClient);
             })

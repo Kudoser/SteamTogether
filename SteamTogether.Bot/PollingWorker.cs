@@ -19,7 +19,7 @@ public sealed class PollingWorker : IHostedService
     {
         using var scope = _serviceProvider.CreateScope();
         var telegram = scope.ServiceProvider.GetRequiredService<ITelegramService>();
-            
+
         await telegram.StartReceivingAsync(cancellationToken);
     }
 
