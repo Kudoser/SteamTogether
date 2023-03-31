@@ -7,9 +7,7 @@ public sealed class PollingWorker : IHostedService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;
 
-    public PollingWorker(
-        IServiceProvider serviceProvider,
-        ILogger<PollingWorker> logger)
+    public PollingWorker(IServiceProvider serviceProvider, ILogger<PollingWorker> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
