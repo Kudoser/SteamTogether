@@ -31,11 +31,12 @@ var host = Host.CreateDefaultBuilder()
                 .AddTypedClient<ITelegramBotClient>(
                     (httpClient, sp) =>
                     {
-                        var opts =
-                            sp.GetService<IOptions<TelegramOptions>>()
-                            ?? throw new ArgumentNullException("TelegramOptions service is null");
-                        var telegramOpts = new TelegramBotClientOptions(opts.Value.Token);
-                        return new TelegramBotClient(telegramOpts, httpClient);
+                        var token = sp.GetService<IOptions<TelegramOptions>>()?.Value.Token;
+                        if (string.IsNullOrEmpty(token))
+                        {
+                            throw new InvalidOperationException("Telegram token is not set");
+                        }
+                        return new TelegramBotClient(token, httpClient);
                     }
                 )
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
