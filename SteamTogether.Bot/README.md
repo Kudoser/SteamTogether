@@ -1,6 +1,6 @@
-# SteamTogether.Bot
+# SteamTogether Telegram Bot
 
-A simple telegram bot based on [Telegram bot](https://github.com/TelegramBots/Telegram.Bot) to find games to play with friends 
+A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots/Telegram.Bot) to find games to play with friends.
 
 ## How it works
 
@@ -8,15 +8,19 @@ A simple telegram bot based on [Telegram bot](https://github.com/TelegramBots/Te
 
 ## Getting Started
 
-### How to run:
+### How to run
 
-* Get a token for your bot https://core.telegram.org/bots#how-do-i-create-a-bot
-* Run the app, for example run from command line: `.\SteamTogether.Bot.exe  --Telegram:Token=YOUR_TOKEN`
+* Get a token for your bot <https://core.telegram.org/bots#how-do-i-create-a-bot>
+* Run the app, providing the token:
+  * as a command line argument:
 
-Other options to run:
+    ```shell
+    > .\SteamTogether.Bot.exe  --Telegram:Token=YOUR_TOKEN
+    ```
 
-Using environment variables 
-```
-> set BOT_Telegram__Token=YOUR_TELEGRAM_TOKEN
-> .\SteamTogether.Bot.exe
-```
+  * or as an environment variable:
+
+    ```shell
+    > set BOT_Telegram__Token=YOUR_TELEGRAM_TOKEN
+    > .\SteamTogether.Bot.exe
+    ```
