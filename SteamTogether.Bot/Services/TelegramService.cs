@@ -21,13 +21,17 @@ public class TelegramService : ITelegramService
     {
         using CancellationTokenSource cts = new();
 
-        ReceiverOptions receiverOptions = new()
-        {
-            AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
-        };
+        ReceiverOptions receiverOptions =
+            new()
+            {
+                AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
+            };
 
         var me = await _client.GetMeAsync(cancellationToken);
-        _logger.LogInformation("Connected to {BotName}, starting receiving messages...", me.Username);
+        _logger.LogInformation(
+            "Connected to {BotName}, starting receiving messages...",
+            me.Username
+        );
 
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,
@@ -37,8 +41,11 @@ public class TelegramService : ITelegramService
         );
     }
 
-    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
-        CancellationToken cancellationToken)
+    private async Task HandleUpdateAsync(
+        ITelegramBotClient botClient,
+        Update update,
+        CancellationToken cancellationToken
+    )
     {
         // Only process Message updates: https://core.telegram.org/bots/api#message
         if (update.Message is not { } message)
@@ -48,7 +55,8 @@ public class TelegramService : ITelegramService
             return;
 
         var chatId = message.Chat.Id;
-        _logger.LogInformation("Received a '{MessageText}' message in chat {ChatId}",
+        _logger.LogInformation(
+            "Received a '{MessageText}' message in chat {ChatId}",
             message.Text,
             message.Chat.Id
         );
@@ -57,11 +65,15 @@ public class TelegramService : ITelegramService
         var sentMessage = await botClient.SendTextMessageAsync(
             chatId: chatId,
             text: "You said:\n" + messageText,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken
+        );
     }
 
-    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception,
-        CancellationToken cancellationToken)
+    private Task HandlePollingErrorAsync(
+        ITelegramBotClient botClient,
+        Exception exception,
+        CancellationToken cancellationToken
+    )
     {
         var errorMessage = exception switch
         {
