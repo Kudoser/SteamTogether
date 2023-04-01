@@ -42,3 +42,7 @@ https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotn
     ```shell
     > dotnet ef database update
     ```
+  
+## Telegram bot
+### Supported commands
+* `list` — returns the list of steam players at the same chat ready to participate

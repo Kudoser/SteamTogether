@@ -3,6 +3,9 @@ using SteamTogether.Bot;
 using SteamTogether.Bot.Context;
 using SteamTogether.Bot.Options;
 using SteamTogether.Bot.Services;
+using SteamTogether.Bot.Services.Command.Factory;
+using SteamTogether.Bot.Services.Command.Handlers;
+using SteamTogether.Bot.Services.Command.Parser;
 using Telegram.Bot;
 
 var host = Host.CreateDefaultBuilder()
@@ -45,6 +48,9 @@ var host = Host.CreateDefaultBuilder()
                 )
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
+            services.AddScoped<ITelegramCommandParser, TelegramCommandParser>();
+            services.AddScoped<ITelegramCommandHandler, TelegramCommandHandler>();
+            services.AddScoped<ITelegramListCommandFactory, PlayersListCommandFactory>();
             services.AddScoped<ITelegramService, TelegramService>();
             services.AddHostedService<PollingWorker>();
         }

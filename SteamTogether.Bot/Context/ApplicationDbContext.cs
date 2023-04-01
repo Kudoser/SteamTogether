@@ -8,7 +8,8 @@ namespace SteamTogether.Bot.Context;
 public class ApplicationDbContext : DbContext
 {
     private readonly DatabaseOptions _options;
-    public DbSet<SteamPlayer> Players { get; set; }
+    public DbSet<SteamPlayer> SteamPlayers { get; set; }
+    public DbSet<TelegramChat> TelegramChat { get; set; }
 
     public ApplicationDbContext(IOptions<DatabaseOptions> options)
     {
@@ -19,7 +20,39 @@ public class ApplicationDbContext : DbContext
     {
         modelBuilder
             .Entity<SteamPlayer>()
+            .HasKey(player => player.PlayerId);
+
+        modelBuilder
+            .Entity<SteamPlayer>()
             .HasData(_options.SeedData.SteamPlayers);
+
+        modelBuilder
+            .Entity<TelegramChat>()
+            .HasKey(chat => chat.ChatId);
+
+        modelBuilder
+            .Entity<TelegramChat>()
+            .HasMany(e => e.Players)
+            .WithMany(e => e.TelegramChats)
+            .UsingEntity<Dictionary<string, object>>(
+                "SteamPlayerTelegramChat",
+                r => r.HasOne<SteamPlayer>().WithMany().HasForeignKey("PlayerId"),
+                l => l.HasOne<TelegramChat>().WithMany().HasForeignKey("ChatId"),
+                je =>
+                {
+                    je.HasKey("PlayerId", "ChatId");
+                    je.HasData(
+                        _options.SeedData.SteamPlayers.Select(player => new
+                        {
+                            PlayerId = player.PlayerId,
+                            ChatId = 1
+                        })
+                    );
+                });
+        
+        modelBuilder
+            .Entity<TelegramChat>()
+            .HasData(new TelegramChat {ChatId = 1});
     }
 
 
