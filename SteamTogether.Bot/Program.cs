@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using SteamTogether.Bot;
+using SteamTogether.Bot.Context;
 using SteamTogether.Bot.Options;
 using SteamTogether.Bot.Services;
 using Telegram.Bot;
@@ -23,9 +24,10 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureServices(
         (builder, services) =>
         {
-            services.Configure<TelegramOptions>(
-                builder.Configuration.GetSection(TelegramOptions.Telegram)
-            );
+            services.AddDbContext<ApplicationDbContext>();
+            
+            services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
+            services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.Database));
 
             services
                 .AddHttpClient(nameof(TelegramBotClient))
