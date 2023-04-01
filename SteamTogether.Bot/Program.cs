@@ -8,15 +8,16 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureAppConfiguration(
         (context, config) =>
         {
-            config.SetBasePath(Directory.GetCurrentDirectory());
-            config.AddJsonFile("appsettings.json", optional: false, true);
-            config.AddJsonFile(
-                $"appsettings.{context.HostingEnvironment.EnvironmentName}.json",
-                true,
-                true
-            );
-            config.AddEnvironmentVariables(prefix: "BOT_");
-            config.AddCommandLine(args);
+            config
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, true)
+                .AddJsonFile(
+                    $"appsettings.{context.HostingEnvironment.EnvironmentName}.json",
+                    true,
+                    true
+                )
+                .AddEnvironmentVariables(prefix: "BOT_")
+                .AddCommandLine(args);
         }
     )
     .ConfigureServices(
@@ -36,6 +37,7 @@ var host = Host.CreateDefaultBuilder()
                         {
                             throw new InvalidOperationException("Telegram token is not set");
                         }
+
                         return new TelegramBotClient(token, httpClient);
                     }
                 )
