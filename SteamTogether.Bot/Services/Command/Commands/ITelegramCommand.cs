@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types;
 
-namespace SteamTogether.Bot.Services.Command;
+namespace SteamTogether.Bot.Services.Command.Commands;
 
 public interface ITelegramCommand
 {

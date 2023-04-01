@@ -1,4 +1,6 @@
-﻿namespace SteamTogether.Bot.Services.Command.Handlers;
+﻿using SteamTogether.Bot.Services.Command.Commands;
+
+namespace SteamTogether.Bot.Services.Command.Handlers;
 
 public interface ITelegramCommandHandler
 {

@@ -3,7 +3,7 @@ using SteamTogether.Bot.Context;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace SteamTogether.Bot.Services.Command;
+namespace SteamTogether.Bot.Services.Command.Commands;
 
 public class PlayersListCommand : ITelegramCommand
 {
