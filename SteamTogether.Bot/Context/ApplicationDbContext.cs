@@ -45,7 +45,7 @@ public class ApplicationDbContext : DbContext
                         _options.SeedData.SteamPlayers.Select(player => new
                         {
                             PlayerId = player.PlayerId,
-                            ChatId = 1
+                            ChatId = (long)1
                         })
                     );
                 });

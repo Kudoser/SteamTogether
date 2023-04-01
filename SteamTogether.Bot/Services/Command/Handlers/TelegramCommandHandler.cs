@@ -1,23 +1,35 @@
-﻿using SteamTogether.Bot.Exceptions;
+﻿using SteamTogether.Bot.Context;
+using SteamTogether.Bot.Exceptions;
 using SteamTogether.Bot.Services.Command.Commands;
-using SteamTogether.Bot.Services.Command.Factory;
+using Telegram.Bot;
 
 namespace SteamTogether.Bot.Services.Command.Handlers;
 
 public class TelegramCommandHandler : ITelegramCommandHandler
 {
-    private readonly ITelegramListCommandFactory _listCommandFactory;
+    private readonly ITelegramBotClient _telegramClient;
+    private readonly ApplicationDbContext _dbContext;
+    private readonly ILoggerFactory _loggerFactory;
 
-    public TelegramCommandHandler(ITelegramListCommandFactory listCommandFactory)
+    public TelegramCommandHandler(ITelegramBotClient telegramClient, ApplicationDbContext dbContext, ILoggerFactory loggerFactory)
     {
-        _listCommandFactory = listCommandFactory;
+        _telegramClient = telegramClient;
+        _dbContext = dbContext;
+        _loggerFactory = loggerFactory;
     }
 
     public ITelegramCommand Resolve(string name)
     {
         if (name == PlayersListCommand.Name)
         {
-            return _listCommandFactory.Create();
+            var logger = _loggerFactory.CreateLogger<PlayersListCommand>();
+            return new PlayersListCommand(_telegramClient, _dbContext, logger);
+        }
+        
+        if (name == AddPlayerListCommand.Name)
+        {
+            var logger = _loggerFactory.CreateLogger<AddPlayerListCommand>();
+            return new AddPlayerListCommand(_telegramClient, _dbContext, logger);
         }
 
         throw new UnknownCommandException($"Unknown command name={name}]");

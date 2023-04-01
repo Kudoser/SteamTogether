@@ -10,7 +10,7 @@ using SteamTogether.Bot.Context;
 namespace SteamTogether.Bot.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230401150433_Init")]
+    [Migration("20230401163110_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace SteamTogether.Bot.Migrations
                     b.Property<string>("PlayerId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ChatId")
+                    b.Property<long>("ChatId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "ChatId");
@@ -37,12 +37,12 @@ namespace SteamTogether.Bot.Migrations
                         new
                         {
                             PlayerId = "76561198068819558",
-                            ChatId = 1
+                            ChatId = 1L
                         },
                         new
                         {
                             PlayerId = "zebradil",
-                            ChatId = 1
+                            ChatId = 1L
                         });
                 });
 
@@ -71,7 +71,7 @@ namespace SteamTogether.Bot.Migrations
 
             modelBuilder.Entity("SteamTogether.Bot.Models.TelegramChat", b =>
                 {
-                    b.Property<int>("ChatId")
+                    b.Property<long>("ChatId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -82,7 +82,7 @@ namespace SteamTogether.Bot.Migrations
                     b.HasData(
                         new
                         {
-                            ChatId = 1
+                            ChatId = 1L
                         });
                 });
 

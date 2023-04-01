@@ -28,7 +28,7 @@ namespace SteamTogether.Bot.Migrations
                 name: "TelegramChat",
                 columns: table => new
                 {
-                    ChatId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ChatId = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true)
                 },
                 constraints: table =>
@@ -41,7 +41,7 @@ namespace SteamTogether.Bot.Migrations
                 columns: table => new
                 {
                     PlayerId = table.Column<string>(type: "TEXT", nullable: false),
-                    ChatId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ChatId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,15 +72,15 @@ namespace SteamTogether.Bot.Migrations
             migrationBuilder.InsertData(
                 table: "TelegramChat",
                 column: "ChatId",
-                value: 1);
+                value: 1L);
 
             migrationBuilder.InsertData(
                 table: "SteamPlayerTelegramChat",
                 columns: new[] { "ChatId", "PlayerId" },
                 values: new object[,]
                 {
-                    { 1, "76561198068819558" },
-                    { 1, "zebradil" }
+                    { 1L, "76561198068819558" },
+                    { 1L, "zebradil" }
                 });
 
             migrationBuilder.CreateIndex(

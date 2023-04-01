@@ -2,7 +2,7 @@
 
 public class TelegramChat
 {
-    public int ChatId { get; set; }
+    public long ChatId { get; set; }
     
-    public IEnumerable<SteamPlayer> Players { get; set; } = new List<SteamPlayer>();
+    public ICollection<SteamPlayer> Players { get; set; } = new List<SteamPlayer>();
 }

@@ -19,10 +19,8 @@ public class PlayersListCommand : ITelegramCommand
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> arguments)
+    public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
     {
-        _logger.LogInformation("Executing `{Name}` command with args: {Arguments}", Name, arguments);
-
         var chat = await _dbContext.TelegramChat
             .Include(chat => chat.Players)
             .FirstOrDefaultAsync(chat => chat.ChatId == 1);
