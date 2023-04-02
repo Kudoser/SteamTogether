@@ -24,36 +24,46 @@ public class AddPlayerListCommand : ITelegramCommand
     public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
     {
         var chatId = inputMessage.Chat.Id;
-        var playerIds = args;
+        var playerId = args.FirstOrDefault();
+        if (string.IsNullOrEmpty(playerId))
+        {
+            await SendMessage(chatId, "argument has not been recognized");
+            return;
+        }
 
         var chat = _dbContext.TelegramChat
             .Where(chat => chat.ChatId == chatId)
             .Include(c => c.Players)
             .FirstOrDefault();
-        
+
         if (chat == null)
         {
             chat = new TelegramChat {ChatId = chatId};
         }
         
-        var count = 0;
-        foreach (var playerId in playerIds)
+        if (chat.Players.Select(p => p.PlayerId).Contains(playerId))
         {
-            if (!chat.Players.Select(p => p.PlayerId).Contains(playerId))
-            {
-                // @todo using steam api check that player id exists
-                chat.Players.Add(new SteamPlayer {PlayerId = playerId});
-                count++;
-            }
+            await SendMessage(chatId, $"player {playerId} has already been added");
+            return;
         }
-
-        await _dbContext.SaveChangesAsync();
         
+        // @todo using steam api check that player id exists
+        chat.Players.Add(new SteamPlayer {PlayerId = playerId});
+        await _dbContext.SaveChangesAsync();
+
         await _telegramClient.SendTextMessageAsync(
             chatId: inputMessage.Chat.Id,
-            text: $"{count} players were added",
+            text: $"player {playerId} has been added",
             cancellationToken: new CancellationToken()
         );
-        
+    }
+
+    private async Task SendMessage(long chatId, string message)
+    {
+        await _telegramClient.SendTextMessageAsync(
+            chatId: chatId,
+            text: message,
+            cancellationToken: new CancellationToken()
+        );
     }
 }
