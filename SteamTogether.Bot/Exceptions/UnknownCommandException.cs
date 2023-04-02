@@ -2,7 +2,6 @@
 
 public class UnknownCommandException : Exception
 {
-    public UnknownCommandException(string? message) : base(message)
-    {
-    }
+    public UnknownCommandException(string? message)
+        : base(message) { }
 }

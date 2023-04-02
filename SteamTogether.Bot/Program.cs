@@ -27,9 +27,13 @@ var host = Host.CreateDefaultBuilder()
         (builder, services) =>
         {
             services.AddDbContext<ApplicationDbContext>();
-            
-            services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
-            services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.Database));
+
+            services.Configure<TelegramOptions>(
+                builder.Configuration.GetSection(TelegramOptions.Telegram)
+            );
+            services.Configure<DatabaseOptions>(
+                builder.Configuration.GetSection(DatabaseOptions.Database)
+            );
             services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
 
             services.AddHttpClient();
@@ -53,7 +57,7 @@ var host = Host.CreateDefaultBuilder()
             services.AddScoped<ITelegramCommandHandler, TelegramCommandHandler>();
             services.AddScoped<ITelegramService, TelegramService>();
             services.AddScoped<ISteamService, SteamService>();
-            
+
             services.AddHostedService<PollingWorker>();
         }
     )

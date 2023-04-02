@@ -18,13 +18,9 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder
-            .Entity<SteamPlayer>()
-            .HasKey(player => player.PlayerId);
+        modelBuilder.Entity<SteamPlayer>().HasKey(player => player.PlayerId);
 
-        modelBuilder
-            .Entity<TelegramChat>()
-            .HasKey(chat => chat.ChatId);
+        modelBuilder.Entity<TelegramChat>().HasKey(chat => chat.ChatId);
 
         modelBuilder
             .Entity<TelegramChat>()
@@ -37,9 +33,9 @@ public class ApplicationDbContext : DbContext
                 je =>
                 {
                     je.HasKey("PlayerId", "ChatId");
-                });
+                }
+            );
     }
-
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
