@@ -33,6 +33,13 @@ public class PlayersListCommand : ITelegramCommand
                 text: $"Players: {list}",
                 cancellationToken: new CancellationToken()
             );
+            return;
         }
+        
+        await _telegramClient.SendTextMessageAsync(
+            chatId: inputMessage.Chat.Id,
+            text: "The list is empty",
+            cancellationToken: new CancellationToken()
+        );
     }
 }
