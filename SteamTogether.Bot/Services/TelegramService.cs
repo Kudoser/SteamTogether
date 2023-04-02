@@ -1,4 +1,7 @@
-﻿using Telegram.Bot;
+﻿using SteamTogether.Bot.Exceptions;
+using SteamTogether.Bot.Services.Command.Handlers;
+using SteamTogether.Bot.Services.Command.Parser;
+using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -9,29 +12,28 @@ namespace SteamTogether.Bot.Services;
 public class TelegramService : ITelegramService
 {
     private readonly ITelegramBotClient _client;
+    private readonly ITelegramCommandParser _telegramCommandParser;
+    private readonly ITelegramCommandHandler _telegramCommandHandler;
     private readonly ILogger<ITelegramService> _logger;
 
-    public TelegramService(ITelegramBotClient client, ILogger<TelegramService> logger)
+    public TelegramService(
+        ITelegramBotClient client, 
+        ITelegramCommandParser telegramCommandParser,
+        ITelegramCommandHandler telegramCommandHandler,
+        ILogger<TelegramService> logger)
     {
         _client = client;
+        _telegramCommandParser = telegramCommandParser;
+        _telegramCommandHandler = telegramCommandHandler;
         _logger = logger;
     }
 
     public async Task StartReceivingAsync(CancellationToken cancellationToken)
     {
-        using CancellationTokenSource cts = new();
-
-        ReceiverOptions receiverOptions =
-            new()
-            {
-                AllowedUpdates = Array.Empty<UpdateType>() // receive all update types
-            };
+        ReceiverOptions receiverOptions = new() {AllowedUpdates = Array.Empty<UpdateType>()};
 
         var me = await _client.GetMeAsync(cancellationToken);
-        _logger.LogInformation(
-            "Connected to {BotName}, starting receiving messages...",
-            me.Username
-        );
+        _logger.LogInformation("Connected to {BotName}, starting receiving messages...", me.Username);
 
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,
@@ -61,12 +63,31 @@ public class TelegramService : ITelegramService
             message.Chat.Id
         );
 
-        // Echo received message text
-        var sentMessage = await botClient.SendTextMessageAsync(
-            chatId: chatId,
-            text: "You said:\n" + messageText,
-            cancellationToken: cancellationToken
-        );
+        try
+        {
+            var parsedResult = _telegramCommandParser.Parse(message.Text);
+            var command = _telegramCommandHandler.Resolve(parsedResult.CommandName);
+            
+            await command.ExecuteAsync(update.Message, parsedResult.Arguments);
+        }
+        catch (UnknownCommandException e)
+        {
+            _logger.LogError("An error occured during command execution: {Error}", e.Message);
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Can't recognize command",
+                cancellationToken: cancellationToken
+            );
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("An error occured during command execution: {Error}", e.Message);
+            await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Unexpected error",
+                cancellationToken: cancellationToken
+            );
+        }
     }
 
     private Task HandlePollingErrorAsync(
