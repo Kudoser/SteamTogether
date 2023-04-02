@@ -30,7 +30,9 @@ var host = Host.CreateDefaultBuilder()
             
             services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             services.Configure<DatabaseOptions>(builder.Configuration.GetSection(DatabaseOptions.Database));
+            services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
 
+            services.AddHttpClient();
             services
                 .AddHttpClient(nameof(TelegramBotClient))
                 .AddTypedClient<ITelegramBotClient>(
@@ -50,6 +52,8 @@ var host = Host.CreateDefaultBuilder()
             services.AddScoped<ITelegramCommandParser, TelegramCommandParser>();
             services.AddScoped<ITelegramCommandHandler, TelegramCommandHandler>();
             services.AddScoped<ITelegramService, TelegramService>();
+            services.AddScoped<ISteamService, SteamService>();
+            
             services.AddHostedService<PollingWorker>();
         }
     )

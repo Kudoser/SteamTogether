@@ -23,10 +23,6 @@ public class ApplicationDbContext : DbContext
             .HasKey(player => player.PlayerId);
 
         modelBuilder
-            .Entity<SteamPlayer>()
-            .HasData(_options.SeedData.SteamPlayers);
-
-        modelBuilder
             .Entity<TelegramChat>()
             .HasKey(chat => chat.ChatId);
 
@@ -41,24 +37,16 @@ public class ApplicationDbContext : DbContext
                 je =>
                 {
                     je.HasKey("PlayerId", "ChatId");
-                    je.HasData(
-                        _options.SeedData.SteamPlayers.Select(player => new
-                        {
-                            PlayerId = player.PlayerId,
-                            ChatId = (long)1
-                        })
-                    );
                 });
-        
-        modelBuilder
-            .Entity<TelegramChat>()
-            .HasData(new TelegramChat {ChatId = 1});
     }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        ArgumentException.ThrowIfNullOrEmpty(_options.ConnectionString);
+        if (string.IsNullOrEmpty(_options.ConnectionString))
+        {
+            throw new ArgumentException(nameof(_options.ConnectionString));
+        }
 
         optionsBuilder.UseSqlite(_options.ConnectionString);
     }

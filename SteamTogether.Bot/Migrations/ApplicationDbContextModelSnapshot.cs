@@ -18,8 +18,8 @@ namespace SteamTogether.Bot.Migrations
 
             modelBuilder.Entity("SteamPlayerTelegramChat", b =>
                 {
-                    b.Property<string>("PlayerId")
-                        .HasColumnType("TEXT");
+                    b.Property<ulong>("PlayerId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("ChatId")
                         .HasColumnType("INTEGER");
@@ -29,24 +29,13 @@ namespace SteamTogether.Bot.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("SteamPlayerTelegramChat");
-
-                    b.HasData(
-                        new
-                        {
-                            PlayerId = "76561198068819558",
-                            ChatId = 1L
-                        },
-                        new
-                        {
-                            PlayerId = "zebradil",
-                            ChatId = 1L
-                        });
                 });
 
             modelBuilder.Entity("SteamTogether.Bot.Models.SteamPlayer", b =>
                 {
-                    b.Property<string>("PlayerId")
-                        .HasColumnType("TEXT");
+                    b.Property<ulong>("PlayerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ApiKey")
                         .HasColumnType("TEXT");
@@ -54,16 +43,6 @@ namespace SteamTogether.Bot.Migrations
                     b.HasKey("PlayerId");
 
                     b.ToTable("SteamPlayers");
-
-                    b.HasData(
-                        new
-                        {
-                            PlayerId = "76561198068819558"
-                        },
-                        new
-                        {
-                            PlayerId = "zebradil"
-                        });
                 });
 
             modelBuilder.Entity("SteamTogether.Bot.Models.TelegramChat", b =>
@@ -75,12 +54,6 @@ namespace SteamTogether.Bot.Migrations
                     b.HasKey("ChatId");
 
                     b.ToTable("TelegramChat");
-
-                    b.HasData(
-                        new
-                        {
-                            ChatId = 1L
-                        });
                 });
 
             modelBuilder.Entity("SteamPlayerTelegramChat", b =>

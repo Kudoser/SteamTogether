@@ -2,8 +2,6 @@
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace SteamTogether.Bot.Migrations
 {
     /// <inheritdoc />
@@ -16,7 +14,8 @@ namespace SteamTogether.Bot.Migrations
                 name: "SteamPlayers",
                 columns: table => new
                 {
-                    PlayerId = table.Column<string>(type: "TEXT", nullable: false),
+                    PlayerId = table.Column<ulong>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     ApiKey = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -40,7 +39,7 @@ namespace SteamTogether.Bot.Migrations
                 name: "SteamPlayerTelegramChat",
                 columns: table => new
                 {
-                    PlayerId = table.Column<string>(type: "TEXT", nullable: false),
+                    PlayerId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     ChatId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -58,29 +57,6 @@ namespace SteamTogether.Bot.Migrations
                         principalTable: "TelegramChat",
                         principalColumn: "ChatId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "SteamPlayers",
-                columns: new[] { "PlayerId", "ApiKey" },
-                values: new object[,]
-                {
-                    { "76561198068819558", null },
-                    { "zebradil", null }
-                });
-
-            migrationBuilder.InsertData(
-                table: "TelegramChat",
-                column: "ChatId",
-                value: 1L);
-
-            migrationBuilder.InsertData(
-                table: "SteamPlayerTelegramChat",
-                columns: new[] { "ChatId", "PlayerId" },
-                values: new object[,]
-                {
-                    { 1L, "76561198068819558" },
-                    { 1L, "zebradil" }
                 });
 
             migrationBuilder.CreateIndex(
