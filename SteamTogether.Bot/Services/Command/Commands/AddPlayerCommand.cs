@@ -72,7 +72,7 @@ public class AddPlayerListCommand : ITelegramCommand
         chat.Players.Add(new SteamPlayer { PlayerId = player.Data.SteamId });
         await _dbContext.SaveChangesAsync();
 
-        SendMessage(chatId, $"{player.Data.Nickname} has been added");
+        await SendMessage(chatId, $"{player.Data.Nickname} has been added");
     }
 
     private async Task SendMessage(long chatId, string message)
