@@ -13,12 +13,10 @@ public class TelegramCommandParser : ITelegramCommandParser
 
         var parts = input.Split(' ');
         var command = parts[0][1..];
-
-        string[] arguments = null;
-        if (parts.Length > 1)
-        {
-            arguments = parts[1].Split(',');
-        }
+        
+        var arguments = parts.Length > 1
+            ? parts[1].Split(',')
+            : Array.Empty<string>();
 
         return new ParseResult
         {
