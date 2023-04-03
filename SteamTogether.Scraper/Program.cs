@@ -1,6 +1,7 @@
 using SteamTogether.Bot.Services;
 using SteamTogether.Scraper;
 using SteamTogether.Scraper.Options;
+using SteamTogether.Scraper.Services;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(
@@ -26,6 +27,7 @@ var host = Host.CreateDefaultBuilder(args)
             );
 
             services.AddTransient<IDateTimeService, DateTimeService>();
+            services.AddTransient<IScrapperService, ScrapperService>();
             services.AddHostedService<Worker>();
         }
     )
