@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using SteamTogether.Bot.Models;
-using SteamTogether.Bot.Options;
+using SteamTogether.Core.Models;
+using SteamTogether.Core.Options;
 
-namespace SteamTogether.Bot.Context;
+namespace SteamTogether.Core.Context;
 
 public class ApplicationDbContext : DbContext
 {

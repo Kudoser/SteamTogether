@@ -1,4 +1,4 @@
-﻿namespace SteamTogether.Bot.Options;
+﻿namespace SteamTogether.Core.Options;
 
 public class SteamOptions
 {

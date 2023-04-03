@@ -1,4 +1,4 @@
-﻿namespace SteamTogether.Bot.Models;
+﻿namespace SteamTogether.Core.Models;
 
 public class TelegramChat
 {

@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SteamTogether.Bot.Context;
-using SteamTogether.Bot.Models;
-using SteamWebAPI2.Interfaces;
-using SteamWebAPI2.Utilities;
+using SteamTogether.Core.Context;
+using SteamTogether.Core.Models;
+using SteamTogether.Core.Services.Steam;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 

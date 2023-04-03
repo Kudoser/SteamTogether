@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SteamTogether.Bot.Models;
+namespace SteamTogether.Core.Models;
 
 [Table("SteamPlayers")]
 public class SteamPlayer
