@@ -19,8 +19,13 @@ public class Worker : BackgroundService
     {
         var scope = _serviceProvider.CreateScope();
         var options = scope.ServiceProvider.GetRequiredService<IOptions<ScraperOptions>>();
-        var schedule = NCrontab.CrontabSchedule.Parse(options.Value.Schedule);
+        var opts = options.Value;
+        if (opts.RunOnStartup)
+        {
+            await RunScraper();
+        }
 
+        var schedule = NCrontab.CrontabSchedule.Parse(opts.Schedule);
         while (!stoppingToken.IsCancellationRequested)
         {
             var dateTimeService = scope.ServiceProvider.GetRequiredService<IDateTimeService>();
@@ -32,9 +37,13 @@ public class Worker : BackgroundService
             _logger.LogInformation("Next worker run: {Next}", nextExecutionTime);
             await timer.WaitForNextTickAsync(stoppingToken);
 
-            // @todo the job
-
-            _logger.LogInformation("Processing job...done");
+            await RunScraper();
         }
+    }
+
+    private Task RunScraper()
+    {
+        _logger.LogInformation("Processing job...done");
+        return Task.CompletedTask;
     }
 }
