@@ -12,7 +12,11 @@ public class PlayersListCommand : ITelegramCommand
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<PlayersListCommand> _logger;
 
-    public PlayersListCommand(ITelegramBotClient telegramClient, ApplicationDbContext dbContext, ILogger<PlayersListCommand> logger)
+    public PlayersListCommand(
+        ITelegramBotClient telegramClient,
+        ApplicationDbContext dbContext,
+        ILogger<PlayersListCommand> logger
+    )
     {
         _telegramClient = telegramClient;
         _dbContext = dbContext;
@@ -35,7 +39,7 @@ public class PlayersListCommand : ITelegramCommand
             );
             return;
         }
-        
+
         await _telegramClient.SendTextMessageAsync(
             chatId: inputMessage.Chat.Id,
             text: "The list is empty",

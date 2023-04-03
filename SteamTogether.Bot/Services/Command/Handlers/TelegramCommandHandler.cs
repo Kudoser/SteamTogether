@@ -13,10 +13,11 @@ public class TelegramCommandHandler : ITelegramCommandHandler
     private readonly ILoggerFactory _loggerFactory;
 
     public TelegramCommandHandler(
-        ITelegramBotClient telegramClient, 
+        ITelegramBotClient telegramClient,
         ApplicationDbContext dbContext,
         ISteamService steamService,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory
+    )
     {
         _telegramClient = telegramClient;
         _dbContext = dbContext;
@@ -31,7 +32,7 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             var logger = _loggerFactory.CreateLogger<PlayersListCommand>();
             return new PlayersListCommand(_telegramClient, _dbContext, logger);
         }
-        
+
         if (name == AddPlayerListCommand.Name)
         {
             var logger = _loggerFactory.CreateLogger<AddPlayerListCommand>();

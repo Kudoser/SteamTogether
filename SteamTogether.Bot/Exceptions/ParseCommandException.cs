@@ -2,7 +2,6 @@
 
 public class ParseCommandException : Exception
 {
-    public ParseCommandException(string? message) : base(message)
-    {
-    }
+    public ParseCommandException(string? message)
+        : base(message) { }
 }

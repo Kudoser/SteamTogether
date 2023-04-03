@@ -17,10 +17,11 @@ public class AddPlayerListCommand : ITelegramCommand
     private readonly ILogger<AddPlayerListCommand> _logger;
 
     public AddPlayerListCommand(
-        ITelegramBotClient telegramClient, 
+        ITelegramBotClient telegramClient,
         ApplicationDbContext dbContext,
         ISteamService steamService,
-        ILogger<AddPlayerListCommand> logger)
+        ILogger<AddPlayerListCommand> logger
+    )
     {
         _telegramClient = telegramClient;
         _dbContext = dbContext;
@@ -51,15 +52,15 @@ public class AddPlayerListCommand : ITelegramCommand
 
         if (chat == null)
         {
-            chat = new TelegramChat {ChatId = chatId};
+            chat = new TelegramChat { ChatId = chatId };
         }
-        
+
         if (chat.Players.Select(p => p.PlayerId).Contains(playerId))
         {
             await SendMessage(chatId, $"player {unparsedPlayerId} has already been added");
             return;
         }
-        
+
         var steamUserService = _steamService.GetSteamUserWebInterface();
         var player = await steamUserService.GetPlayerSummaryAsync(playerId);
         if (player == null)
@@ -67,11 +68,11 @@ public class AddPlayerListCommand : ITelegramCommand
             await SendMessage(chatId, $"player with ID={playerId} doesn't exist");
             return;
         }
-        
-        chat.Players.Add(new SteamPlayer {PlayerId = player.Data.SteamId});
+
+        chat.Players.Add(new SteamPlayer { PlayerId = player.Data.SteamId });
         await _dbContext.SaveChangesAsync();
 
-        SendMessage(chatId, $"{player.Data.Nickname} has been added");
+        await SendMessage(chatId, $"{player.Data.Nickname} has been added");
     }
 
     private async Task SendMessage(long chatId, string message)

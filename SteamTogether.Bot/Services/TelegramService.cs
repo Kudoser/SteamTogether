@@ -17,10 +17,11 @@ public class TelegramService : ITelegramService
     private readonly ILogger<ITelegramService> _logger;
 
     public TelegramService(
-        ITelegramBotClient client, 
+        ITelegramBotClient client,
         ITelegramCommandParser telegramCommandParser,
         ITelegramCommandHandler telegramCommandHandler,
-        ILogger<TelegramService> logger)
+        ILogger<TelegramService> logger
+    )
     {
         _client = client;
         _telegramCommandParser = telegramCommandParser;
@@ -30,10 +31,13 @@ public class TelegramService : ITelegramService
 
     public async Task StartReceivingAsync(CancellationToken cancellationToken)
     {
-        ReceiverOptions receiverOptions = new() {AllowedUpdates = Array.Empty<UpdateType>()};
+        ReceiverOptions receiverOptions = new() { AllowedUpdates = Array.Empty<UpdateType>() };
 
         var me = await _client.GetMeAsync(cancellationToken);
-        _logger.LogInformation("Connected to {BotName}, starting receiving messages...", me.Username);
+        _logger.LogInformation(
+            "Connected to {BotName}, starting receiving messages...",
+            me.Username
+        );
 
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,
@@ -67,7 +71,7 @@ public class TelegramService : ITelegramService
         {
             var parsedResult = _telegramCommandParser.Parse(message.Text);
             var command = _telegramCommandHandler.Resolve(parsedResult.CommandName);
-            
+
             await command.ExecuteAsync(update.Message, parsedResult.Arguments);
         }
         catch (UnknownCommandException e)

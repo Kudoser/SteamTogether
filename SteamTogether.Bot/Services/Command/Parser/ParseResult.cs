@@ -2,6 +2,6 @@
 
 public class ParseResult
 {
-    public string CommandName { get; set; }
-    public string[] Arguments { get; set; }
+    public string CommandName { get; set; } = default!;
+    public string[] Arguments { get; set; } = default!;
 }
