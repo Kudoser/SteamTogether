@@ -8,8 +8,8 @@ namespace SteamTogether.Bot.Context;
 public class ApplicationDbContext : DbContext
 {
     private readonly DatabaseOptions _options;
-    public DbSet<SteamPlayer> SteamPlayers { get; set; }
-    public DbSet<TelegramChat> TelegramChat { get; set; }
+    public DbSet<SteamPlayer> SteamPlayers { get; set; } = default!;
+    public DbSet<TelegramChat> TelegramChat { get; set; } = default!;
 
     public ApplicationDbContext(IOptions<DatabaseOptions> options)
     {
