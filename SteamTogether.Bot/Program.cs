@@ -28,6 +28,19 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureServices(
         (builder, services) =>
         {
+            services
+                .AddOptions<DatabaseOptions>()
+                .Bind(builder.Configuration.GetSection(DatabaseOptions.Database))
+                .ValidateDataAnnotations();
+            services
+                .AddOptions<TelegramOptions>()
+                .Bind(builder.Configuration.GetSection(TelegramOptions.Telegram))
+                .ValidateDataAnnotations();
+            services
+                .AddOptions<SteamOptions>()
+                .Bind(builder.Configuration.GetSection(SteamOptions.Steam))
+                .ValidateDataAnnotations();
+
             services.AddDbContext<ApplicationDbContext>();
 
             services.Configure<TelegramOptions>(
