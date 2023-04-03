@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SteamTogether.Core.Context;
+using SteamTogether.Bot.Context;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Services.Steam;
 using Telegram.Bot;

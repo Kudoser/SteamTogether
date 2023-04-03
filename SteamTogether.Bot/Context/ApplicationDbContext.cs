@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Options;
 
-namespace SteamTogether.Core.Context;
+namespace SteamTogether.Bot.Context;
 
 public class ApplicationDbContext : DbContext
 {
