@@ -1,4 +1,4 @@
-﻿namespace SteamTogether.Bot.Exceptions;
+﻿namespace SteamTogether.Core.Exceptions;
 
 public class UnknownCommandException : Exception
 {

@@ -1,6 +1,6 @@
-﻿using SteamTogether.Bot.Exceptions;
-using SteamTogether.Bot.Services.Command.Handlers;
+﻿using SteamTogether.Bot.Services.Command.Handlers;
 using SteamTogether.Bot.Services.Command.Parser;
+using SteamTogether.Core.Exceptions;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;

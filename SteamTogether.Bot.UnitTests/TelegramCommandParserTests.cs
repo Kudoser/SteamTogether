@@ -1,5 +1,5 @@
-using SteamTogether.Bot.Exceptions;
 using SteamTogether.Bot.Services.Command.Parser;
+using SteamTogether.Core.Exceptions;
 
 namespace SteamTogether.Bot.UnitTests;
 

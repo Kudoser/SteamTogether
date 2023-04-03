@@ -1,4 +1,4 @@
-﻿using SteamTogether.Bot.Exceptions;
+﻿using SteamTogether.Core.Exceptions;
 
 namespace SteamTogether.Bot.Services.Command.Parser;
 

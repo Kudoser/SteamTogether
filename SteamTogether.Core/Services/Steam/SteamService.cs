@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
-using SteamTogether.Bot.Options;
+using SteamTogether.Core.Options;
 using SteamWebAPI2.Interfaces;
 using SteamWebAPI2.Utilities;
 
-namespace SteamTogether.Bot.Services;
+namespace SteamTogether.Core.Services.Steam;
 
 public class SteamService : ISteamService
 {

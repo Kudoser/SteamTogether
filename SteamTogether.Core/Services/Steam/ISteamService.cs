@@ -1,6 +1,6 @@
 ﻿using SteamWebAPI2.Interfaces;
 
-namespace SteamTogether.Bot.Services;
+namespace SteamTogether.Core.Services.Steam;
 
 public interface ISteamService
 {
