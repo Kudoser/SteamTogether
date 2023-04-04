@@ -15,13 +15,19 @@ Scrape games from steam
   * as a command line argument:
 
     ```shell
-    > .\SteamTogether.Bot.exe  --Steam:ApiKey="YOUR_API_KEY" --Database:ConnectionString="Data Source=together.db"
+    > .\SteamTogether.Bot.exe  --Scraper:Schedule="* */5 * * *" --Steam:ApiKey="YOUR_API_KEY" --Database:ConnectionString="Data Source=together.db"
     ```
 
   * or as an environment variable:
 
     ```shell
     > set SCRAPER_Steam__ApiKey="YOUR_API_KEY"
+    > set SCRAPER_Scraper__Schedule="* */5 * * *"
     > set BOT_Database__ConnectionString="Data Source=together.db"
     > .\SteamTogether.Bot.exe
     ```
+### Arguments:
+
+*  `Schedule` — uses crontab format, for example `"* */5 * * *"` will run scrapper every 5 hours
+https://github.com/atifaziz/NCrontab#ncrontab-crontab-for-net
+* `RunOnStartup` — true/false, if true — triggers code right after host is started and then according to the schedule 
