@@ -1,6 +1,7 @@
 let branchPrefix = "selfhosted-renovate/";
 
 module.exports = {
+  autodiscover: true,
   branchPrefix: branchPrefix,
   dependencyDashboardTitle: "Dependency Dashboard self-hosted",
   dryRun: "full",
