@@ -69,6 +69,8 @@ public class AddPlayerListCommand : ITelegramCommand
         }
 
         chat.Players.Add(new SteamPlayer { PlayerId = player.Data.SteamId });
+
+        _dbContext.TelegramChat.Add(chat);
         await _dbContext.SaveChangesAsync();
 
         await SendMessage(chatId, $"{player.Data.Nickname} has been added");
