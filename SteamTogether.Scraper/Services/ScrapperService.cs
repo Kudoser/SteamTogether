@@ -32,8 +32,10 @@ public class ScrapperService : IScrapperService
             .Where(
                 p =>
                     p.LastSyncDateTime == null
+                    // @todo from config
                     || p.LastSyncDateTime < _dateTimeService.GetCurrentTime().AddHours(-5)
             )
+            // @todo from config
             .Take(10)
             .ToArray();
 
