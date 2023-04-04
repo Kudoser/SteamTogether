@@ -29,8 +29,13 @@ public class ScrapperService : IScrapperService
         _logger.LogInformation("Starting sync...");
 
         var steamPlayers = _dbContext.SteamPlayers
-            .Where(p => p.LastSyncDateTime < _dateTimeService.GetCurrentTime().AddHours(-5))
-            .Take(10);
+            .Where(
+                p =>
+                    p.LastSyncDateTime == null
+                    || p.LastSyncDateTime < _dateTimeService.GetCurrentTime().AddHours(-5)
+            )
+            .Take(10)
+            .ToArray();
 
         if (!steamPlayers.Any())
         {

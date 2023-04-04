@@ -1,4 +1,7 @@
+using SteamTogether.Bot.Context;
 using SteamTogether.Bot.Services;
+using SteamTogether.Core.Options;
+using SteamTogether.Core.Services.Steam;
 using SteamTogether.Scraper;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
@@ -22,12 +25,21 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(
         (builder, services) =>
         {
+            services.AddDbContext<ApplicationDbContext>();
+
             services.Configure<ScraperOptions>(
                 builder.Configuration.GetSection(ScraperOptions.Scraper)
             );
 
+            services.Configure<DatabaseOptions>(
+                builder.Configuration.GetSection(DatabaseOptions.Database)
+            );
+            services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
+
+            services.AddHttpClient();
             services.AddTransient<IDateTimeService, DateTimeService>();
             services.AddTransient<IScrapperService, ScrapperService>();
+            services.AddTransient<ISteamService, SteamService>();
             services.AddHostedService<Worker>();
         }
     )
