@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using SteamTogether.Bot.Services;
+using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
 

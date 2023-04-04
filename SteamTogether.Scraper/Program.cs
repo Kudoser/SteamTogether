@@ -1,6 +1,6 @@
-using SteamTogether.Bot.Services;
 using SteamTogether.Core;
 using SteamTogether.Core.Options;
+using SteamTogether.Core.Services;
 using SteamTogether.Core.Services.Steam;
 using SteamTogether.Scraper;
 using SteamTogether.Scraper.Options;

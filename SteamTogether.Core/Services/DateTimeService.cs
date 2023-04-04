@@ -1,4 +1,4 @@
-﻿namespace SteamTogether.Bot.Services;
+﻿namespace SteamTogether.Core.Services;
 
 public class DateTimeService : IDateTimeService
 {
