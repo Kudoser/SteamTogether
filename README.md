@@ -19,3 +19,15 @@ There are the following projects:
 
 See the corresponding readme files for more info.
 
+## Database 
+
+### Migrations
+
+Go to SteamTogether.Core project
+> cd SteamTogether.Core
+
+make changes to models and create migration
+> dotnet ef migrations Add MyMigrationName --project SteamTogether.Core.csproj --startup-project ../SteamTogether.Bot/SteamTogether.Bot.csproj
+
+Apply changes to a database
+> dotnet ef database update Init --project SteamTogether.Core.csproj --startup-project ../SteamTogether.Bot/SteamTogether.Bot.csproj

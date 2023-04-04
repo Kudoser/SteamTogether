@@ -1,5 +1,5 @@
-﻿using SteamTogether.Bot.Context;
-using SteamTogether.Bot.Services;
+﻿using SteamTogether.Bot.Services;
+using SteamTogether.Core.Context;
 using SteamTogether.Core.Services.Steam;
 
 namespace SteamTogether.Scraper.Services;

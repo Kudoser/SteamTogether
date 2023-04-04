@@ -1,5 +1,5 @@
-﻿using SteamTogether.Bot.Context;
-using SteamTogether.Bot.Services.Command.Commands;
+﻿using SteamTogether.Bot.Services.Command.Commands;
+using SteamTogether.Core.Context;
 using SteamTogether.Core.Exceptions;
 using SteamTogether.Core.Services.Steam;
 using Telegram.Bot;

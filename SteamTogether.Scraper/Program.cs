@@ -1,5 +1,5 @@
-using SteamTogether.Bot.Context;
 using SteamTogether.Bot.Services;
+using SteamTogether.Core;
 using SteamTogether.Core.Options;
 using SteamTogether.Core.Services.Steam;
 using SteamTogether.Scraper;
@@ -25,7 +25,7 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(
         (builder, services) =>
         {
-            services.AddDbContext<ApplicationDbContext>();
+            services.RegisterDataServices();
 
             services.Configure<ScraperOptions>(
                 builder.Configuration.GetSection(ScraperOptions.Scraper)
