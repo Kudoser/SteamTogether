@@ -24,25 +24,8 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
     > set BOT_Telegram__Token="YOUR_TELEGRAM_TOKEN"
     > set BOT_Database__ConnectionString="Data Source=together.db"
     > .\SteamTogether.Bot.exe
-    ```
+    ``` 
     
-## Development
-
-### Migrations
-
-https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli
-
-#### Main commands
-* Create migration:
-  Make changes to a model then run
-    ```shell
-    > dotnet ef migrations add MigrationName
-    ```
-* Apply migration changes to your database
-    ```shell
-    > dotnet ef database update
-    ```
-  
 ## Telegram bot
 ### Supported commands
 * `list - returns the list of steam players at the same chat ready to participate`
