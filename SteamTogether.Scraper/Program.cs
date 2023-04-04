@@ -27,9 +27,10 @@ var host = Host.CreateDefaultBuilder(args)
         {
             services.RegisterDataServices();
 
-            services.Configure<ScraperOptions>(
-                builder.Configuration.GetSection(ScraperOptions.Scraper)
-            );
+            services
+                .AddOptions<ScraperOptions>()
+                .Bind(builder.Configuration.GetSection(ScraperOptions.Scraper))
+                .ValidateDataAnnotations();
 
             services.Configure<DatabaseOptions>(
                 builder.Configuration.GetSection(DatabaseOptions.Database)
