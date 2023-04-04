@@ -3,8 +3,16 @@ name: .NET
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - "**.cs"
+      - "**.csproj"
+      - "**.sln"
   pull_request:
     branches: [ "*" ]
+    paths:
+      - "**.cs"
+      - "**.csproj"
+      - "**.sln"
 
 jobs:
   build:
