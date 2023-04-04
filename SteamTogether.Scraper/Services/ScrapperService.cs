@@ -43,6 +43,8 @@ public class ScrapperService : IScrapperService
             return;
         }
 
+        // @todo fetch online/cooperative games
+        // @todo save to database
         var summaries = await _steamService
             .GetSteamUserWebInterface()
             .GetPlayerSummariesAsync(steamPlayers.Select(p => p.PlayerId).ToArray());

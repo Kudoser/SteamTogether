@@ -43,14 +43,6 @@ var host = Host.CreateDefaultBuilder()
 
             services.RegisterDataServices();
 
-            services.Configure<TelegramOptions>(
-                builder.Configuration.GetSection(TelegramOptions.Telegram)
-            );
-            services.Configure<DatabaseOptions>(
-                builder.Configuration.GetSection(DatabaseOptions.Database)
-            );
-            services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
-
             services.AddHttpClient();
             services
                 .AddHttpClient(nameof(TelegramBotClient))
