@@ -6,7 +6,7 @@ namespace SteamTogether.Core.Models;
 public class SteamPlayer
 {
     public ulong PlayerId { get; set; }
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public string? ApiKey { get; set; }
     public DateTime? LastSyncDateTime { get; set; }
