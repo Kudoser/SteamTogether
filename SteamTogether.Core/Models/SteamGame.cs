@@ -7,7 +7,7 @@ public class SteamGame
     [Key]
     public uint GameId { get; set; }
     public uint SteamAppId { get; set; }
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public bool Multiplayer { get; set; }
 
