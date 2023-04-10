@@ -40,6 +40,12 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             return new AddPlayerListCommand(_telegramClient, _dbContext, _steamService, logger);
         }
 
+        if (name == PlayCommand.Name)
+        {
+            var logger = _loggerFactory.CreateLogger<PlayCommand>();
+            return new PlayCommand(_telegramClient, _dbContext, logger);
+        }
+
         throw new UnknownCommandException($"Unknown command name={name}]");
     }
 }
