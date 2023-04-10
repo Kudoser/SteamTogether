@@ -44,7 +44,6 @@ public class PlayCommand : ITelegramCommand
 
         var uniqueGames = games
             .DistinctBy(game => game.GameId)
-            .Take(10)
             .ToList();
 
         if (uniqueGames.Count > 20)
