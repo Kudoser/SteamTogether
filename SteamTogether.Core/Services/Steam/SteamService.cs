@@ -16,9 +16,15 @@ public class SteamService : ISteamService
         _httpClientFactory = httpClientFactory;
     }
 
-    public SteamUser GetSteamUserWebInterface()
+    public T GetSteamUserWebInterface<T>()
     {
-        var httpClient = _httpClientFactory.CreateClient(nameof(SteamUser));
-        return _steamFactory.CreateSteamWebInterface<SteamUser>(httpClient);
+        var httpClient = _httpClientFactory.CreateClient(nameof(T));
+        return _steamFactory.CreateSteamWebInterface<T>(httpClient);
+    }
+
+    public SteamStore CreateSteamStoreInterface()
+    {
+        var httpClient = _httpClientFactory.CreateClient(nameof(SteamStore));
+        return _steamFactory.CreateSteamStoreInterface(httpClient);
     }
 }

@@ -10,6 +10,7 @@ public class ApplicationDbContext : DbContext
     private readonly DatabaseOptions _options;
     public DbSet<SteamPlayer> SteamPlayers { get; set; } = default!;
     public DbSet<TelegramChat> TelegramChat { get; set; } = default!;
+    public DbSet<SteamGame> SteamGames { get; set; } = default!;
 
     public ApplicationDbContext(IOptions<DatabaseOptions> options)
     {
@@ -19,6 +20,19 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SteamPlayer>().HasKey(player => player.PlayerId);
+        modelBuilder
+            .Entity<SteamPlayer>()
+            .HasMany<SteamGame>(p => p.Games)
+            .WithMany(g => g.Players)
+            .UsingEntity<Dictionary<string, object>>(
+                "SteamPlayerSteamGame",
+                r => r.HasOne<SteamGame>().WithMany().HasForeignKey("GameId"),
+                l => l.HasOne<SteamPlayer>().WithMany().HasForeignKey("PlayerId"),
+                je =>
+                {
+                    je.HasKey("PlayerId", "GameId");
+                }
+            );
 
         modelBuilder.Entity<TelegramChat>().HasKey(chat => chat.ChatId);
 

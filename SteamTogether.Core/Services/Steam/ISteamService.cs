@@ -4,5 +4,6 @@ namespace SteamTogether.Core.Services.Steam;
 
 public interface ISteamService
 {
-    public SteamUser GetSteamUserWebInterface();
+    T GetSteamUserWebInterface<T>();
+    public SteamStore CreateSteamStoreInterface();
 }

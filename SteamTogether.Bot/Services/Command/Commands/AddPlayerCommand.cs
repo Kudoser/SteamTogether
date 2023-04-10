@@ -2,6 +2,7 @@
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Services.Steam;
+using SteamWebAPI2.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -60,13 +61,16 @@ public class AddPlayerListCommand : ITelegramCommand
             return;
         }
 
-        var steamUserService = _steamService.GetSteamUserWebInterface();
+        var steamUserService = _steamService.GetSteamUserWebInterface<SteamUser>();
         var player = await steamUserService.GetPlayerSummaryAsync(playerId);
         if (player == null)
         {
             await SendMessage(chatId, $"player with ID={playerId} doesn't exist");
             return;
         }
+
+        // @todo check if profile is public
+        // @todo add possibility to read APIKEY
 
         chat.Players.Add(new SteamPlayer { PlayerId = player.Data.SteamId });
 
