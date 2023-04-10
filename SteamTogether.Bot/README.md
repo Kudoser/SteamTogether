@@ -30,3 +30,4 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
 ### Supported commands
 * `list - returns the list of steam players at the same chat ready to participate`
 * `add - adds a new steam player id (@todo: and optionally steam api key)`
+* `play - provides a list of common multiplayer games`

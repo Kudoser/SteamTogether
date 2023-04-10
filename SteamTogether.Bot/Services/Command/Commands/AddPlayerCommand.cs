@@ -2,6 +2,7 @@
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Services.Steam;
+using SteamWebAPI2.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -43,37 +44,46 @@ public class AddPlayerListCommand : ITelegramCommand
             await SendMessage(chatId, "steamId should be a number");
             return;
         }
+        
+        var player = await _dbContext.SteamPlayers.FindAsync(playerId);
+        if (player == null)
+        {
+            var steamUserService = _steamService.GetSteamUserWebInterface<SteamUser>();
+            var steamWebResponse = await steamUserService.GetPlayerSummaryAsync(playerId);
+            if (steamWebResponse == null)
+            {
+                await SendMessage(chatId, $"player with ID={playerId} doesn't exist");
+                return;
+            }
+
+            player = new SteamPlayer
+            {
+                PlayerId = steamWebResponse.Data.SteamId,
+                Name = steamWebResponse.Data.Nickname
+            };
+            _dbContext.SteamPlayers.Add(player);
+        }
 
         var chat = _dbContext.TelegramChat
             .Where(chat => chat.ChatId == chatId)
-            .Include(c => c.Players)
+            .Include(chat => chat.Players)
             .FirstOrDefault();
-
+        
         if (chat == null)
         {
-            chat = new TelegramChat { ChatId = chatId };
+            chat = new TelegramChat {ChatId = chatId};
+            _dbContext.TelegramChat.Add(chat);
         }
-
-        if (chat.Players.Select(p => p.PlayerId).Contains(playerId))
+        
+        if (chat.Players.FirstOrDefault(p => p.PlayerId == player.PlayerId) != null)
         {
-            await SendMessage(chatId, $"player {unparsedPlayerId} has already been added");
+            await SendMessage(chatId, $"player {player.Name} has already been added");
             return;
         }
-
-        var steamUserService = _steamService.GetSteamUserWebInterface();
-        var player = await steamUserService.GetPlayerSummaryAsync(playerId);
-        if (player == null)
-        {
-            await SendMessage(chatId, $"player with ID={playerId} doesn't exist");
-            return;
-        }
-
-        chat.Players.Add(new SteamPlayer { PlayerId = player.Data.SteamId });
-
-        _dbContext.TelegramChat.Add(chat);
+        chat.Players.Add(player);
         await _dbContext.SaveChangesAsync();
 
-        await SendMessage(chatId, $"{player.Data.Nickname} has been added");
+        await SendMessage(chatId, $"{player.Name} has been added");
     }
 
     private async Task SendMessage(long chatId, string message)

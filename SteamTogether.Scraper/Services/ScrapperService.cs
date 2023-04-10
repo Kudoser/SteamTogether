@@ -1,18 +1,24 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Steam.Models.SteamStore;
 using SteamTogether.Core.Context;
+using SteamTogether.Core.Exceptions;
+using SteamTogether.Core.Models;
 using SteamTogether.Core.Services;
 using SteamTogether.Core.Services.Steam;
 using SteamTogether.Scraper.Options;
+using SteamWebAPI2.Interfaces;
 
 namespace SteamTogether.Scraper.Services;
 
 public class ScrapperService : IScrapperService
 {
-    private readonly ISteamService _steamService;
     private readonly ScraperOptions _options;
     private readonly ApplicationDbContext _dbContext;
     private readonly IDateTimeService _dateTimeService;
     private readonly ILogger<ScrapperService> _logger;
+    private readonly PlayerService _steamUserService;
+    private readonly SteamStore _steamStoreService;
 
     public ScrapperService(
         ISteamService steamService,
@@ -22,11 +28,13 @@ public class ScrapperService : IScrapperService
         ILogger<ScrapperService> logger
     )
     {
-        _steamService = steamService;
         _options = options.Value;
         _dbContext = dbContext;
         _dateTimeService = dateTimeService;
         _logger = logger;
+
+        _steamUserService = steamService.GetSteamUserWebInterface<PlayerService>();
+        _steamStoreService = steamService.CreateSteamStoreInterface();
     }
 
     public async Task RunSync()
@@ -34,25 +42,118 @@ public class ScrapperService : IScrapperService
         _logger.LogInformation("Starting sync...");
 
         var syncDate = _dateTimeService.GetCurrentTime().AddSeconds(-_options.SyncPeriodSeconds);
-        var steamPlayers = _dbContext.SteamPlayers
+        var steamPlayerIds = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
+            .Select(player => player.PlayerId)
             .Take(_options.PlayersPerRun)
             .ToArray();
 
-        if (!steamPlayers.Any())
+        if (!steamPlayerIds.Any())
         {
             _logger.LogInformation("Nothing to process");
             return;
         }
 
-        // @todo fetch online/cooperative games
-        // @todo save to database
-        var summaries = await _steamService
-            .GetSteamUserWebInterface()
-            .GetPlayerSummariesAsync(steamPlayers.Select(p => p.PlayerId).ToArray());
+        foreach (var playerId in steamPlayerIds)
+        {
+            var player = _dbContext.SteamPlayers
+                .Where(player => player.PlayerId == playerId)
+                .Include(player => player.Games)
+                .FirstOrDefault();
+
+            if (player == null)
+            {
+                throw new EntityNotFoundException(nameof(SteamPlayer));
+            }
+            
+            var ownedGamesRequest = await _steamUserService
+                .GetOwnedGamesAsync(playerId);
+
+            var ownedGameIds = ownedGamesRequest.Data.OwnedGames
+                .Select(o => o.AppId)
+                .ToArray();
+
+            await RemoveDisconnectedGamesFromPlayer(player, ownedGameIds);
+            
+            foreach (var ownedGameId in ownedGameIds)
+            {
+                StoreAppDetailsDataModel storeApp;
+                try
+                {
+                    storeApp = await _steamStoreService.GetStoreAppDetailsAsync(ownedGameId);
+                }
+                catch (Exception)
+                {
+                    _logger.LogError("App {AppId} doesn't exist", ownedGameId);
+                    continue;
+                }
+                
+                var multiplayer = storeApp.Categories.Any(
+                    // @todo move constants
+                    category => new uint[] {1, 9, 38}.Contains(category.Id)
+                );
+
+                var game = await _dbContext.SteamGames.FindAsync(ownedGameId);
+                if (game == null)
+                {
+                    game = new SteamGame
+                    {
+                        GameId = ownedGameId,
+                        SteamAppId = storeApp.SteamAppId,
+                        Name = storeApp.Name,
+                        LastSyncDateTime = _dateTimeService.GetCurrentTime(),
+                        Multiplayer = multiplayer
+                    };
+                    
+                    _logger.LogInformation("Adding GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                    _dbContext.SteamGames.Add(game);
+                }
+                else
+                {
+                    game.SteamAppId = storeApp.SteamAppId;
+                    game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
+                    game.Name = storeApp.Name;
+                    game.Multiplayer = multiplayer;
+
+                    _logger.LogInformation("Updating GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                    _dbContext.SteamGames.Update(game);
+                }
+
+                var connected = player.Games
+                    .Select(g => g.GameId)
+                    .Contains(game.GameId);
+
+                if (!connected)
+                {
+                    _logger.LogInformation("Adding GameId={GameId} to player {Name}", ownedGameId, player.Name);
+                    player.Games.Add(game);
+                    player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
+                }
+            }
+
+            var count = await _dbContext.SaveChangesAsync();
+            _logger.LogInformation("{Count} games for player {Name} were synced", count, player.Name);
+        }
 
         _logger.LogInformation("Done");
+    }
 
-        return;
+    private async Task RemoveDisconnectedGamesFromPlayer(SteamPlayer player, uint[] ownedGameIds)
+    {
+        var notOwnedGames = player.Games
+            .Where(game => !ownedGameIds.Contains(game.GameId))
+            .ToArray();
+
+        if (notOwnedGames.Any())
+        {
+            _logger.LogInformation("Removing {Count} games from player {Name}", notOwnedGames.Length, player.Name);
+            foreach (var notOwnedGame in notOwnedGames)
+            {
+                player.Games.Remove(notOwnedGame);
+            }
+                
+            await _dbContext.SaveChangesAsync();
+        }
+
     }
 }
