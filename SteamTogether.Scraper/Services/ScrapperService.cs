@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using Steam.Models.SteamStore;
 using SteamTogether.Core.Context;
-using SteamTogether.Core.Exceptions;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Services;
 using SteamTogether.Core.Services.Steam;
@@ -116,7 +115,7 @@ public class ScrapperService : IScrapperService
                 {
                     _logger.LogInformation("Up to date, last synced at {LastUpdated}", game.LastSyncDateTime);
                 }
-                
+
                 game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
 
                 var connected = player.Games
@@ -128,10 +127,9 @@ public class ScrapperService : IScrapperService
                     _logger.LogInformation("Adding GameId={GameId} to player {Name}", ownedGameId, player.Name);
                     player.Games.Add(game);
                 }
-                
-                player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
             }
 
+            player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
             var count = await _dbContext.SaveChangesAsync();
             _logger.LogInformation("{Count} games for player {Name} were synced", count, player.Name);
         }
@@ -155,32 +153,5 @@ public class ScrapperService : IScrapperService
 
             await _dbContext.SaveChangesAsync();
         }
-    }
-
-    private async Task<SteamGame> GetSteamGame(uint gameId)
-    {
-        StoreAppDetailsDataModel storeApp;
-        try
-        {
-            storeApp = await _steamStoreService.GetStoreAppDetailsAsync(gameId);
-        }
-        catch (Exception)
-        {
-            _logger.LogError("App {AppId} doesn't exist", gameId);
-            throw;
-        }
-
-        var multiplayer = storeApp.Categories.Any(
-            // @todo move constants
-            category => new uint[] {1, 9, 38}.Contains(category.Id)
-        );
-
-        return new SteamGame
-        {
-            SteamAppId = storeApp.SteamAppId,
-            Name = storeApp.Name,
-            LastSyncDateTime = _dateTimeService.GetCurrentTime(),
-            Multiplayer = multiplayer
-        };
     }
 }
