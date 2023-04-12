@@ -53,7 +53,7 @@ public class ScrapperService : IScrapperService
             return;
         }
 
-        var allGames = _dbContext.SteamGames.ToArray();
+        var allGames = _dbContext.SteamGames.ToList();
         foreach (var player in steamPlayers)
         {
             _logger.LogInformation("Processing player Name={Name}", player.Name);
@@ -101,6 +101,7 @@ public class ScrapperService : IScrapperService
                         };
 
                         _logger.LogInformation("Adding GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                        allGames.Add(game);
                         _dbContext.SteamGames.Add(game);
                     }
                     else
