@@ -65,16 +65,12 @@ public class ScrapperService : IScrapperService
 
             await RemoveDisconnectedGamesFromPlayer(player, ownedGameIds);
 
-            var ownedGames = _dbContext.SteamGames
-                .Where(g => ownedGameIds.Contains(g.GameId))
-                .ToArray();
-
             foreach (var ownedGameId in ownedGameIds)
             {
                 _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
 
                 var lastGamesSync = _dateTimeService.GetCurrentTime().AddMinutes(-_options.GamesSyncPeriodMinutes);
-                var game = ownedGames.FirstOrDefault(g => g.GameId == ownedGameId);
+                var game = player.Games.FirstOrDefault(g => g.GameId == ownedGameId);
                 if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
                 {
                     StoreAppDetailsDataModel storeApp;
