@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Steam.Models.SteamCommunity;
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Services.Steam;
@@ -53,6 +54,13 @@ public class AddPlayerListCommand : ITelegramCommand
             if (steamWebResponse == null)
             {
                 await SendMessage(chatId, $"player with ID={playerId} doesn't exist");
+                return;
+            }
+
+            // @todo add public API Key support
+            if (steamWebResponse.Data.ProfileVisibility != ProfileVisibility.Public)
+            {
+                await SendMessage(chatId, $"Steam profile is not public");
                 return;
             }
 
