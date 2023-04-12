@@ -31,29 +31,27 @@ public class PlayCommand : ITelegramCommand
 
         var chat = _dbContext.TelegramChat
             .Where(chat => chat.ChatId == chatId)
-            .Include(c => c.Players)
-            .ThenInclude(player => player.Games.Where(game => game.Multiplayer))
+            .Include(chat => chat.Players)
+            .ThenInclude(player => player.Games)
             .FirstOrDefault();
-
-        ArgumentNullException.ThrowIfNull(chat);
         
-        var games = new List<SteamGame>();
-        foreach (var player in chat.Players)
-        {
-            games.AddRange(player.Games);
-        }
+        ArgumentNullException.ThrowIfNull(chat);
 
-        var uniqueGames = games
-            .DistinctBy(game => game.GameId)
-            .ToList();
+        var games = chat.Players.SelectMany(player => player.Games,
+                (player, game) => new {PlayerName = player.Name, GameName = game.Name})
+            .GroupBy(p => p.GameName)
+            .Select(g =>
+            new {
+                Name = g.Key,
+                Count = g.Count(),
+                Players = string.Join(",", g.Select(p => p.PlayerName)) 
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(15);
 
-        if (uniqueGames.Count > 20)
-        {
-            await SendMessage(chatId, $"Game list is too long, it contains {uniqueGames.Count} games");
-            return;
-        }
-
-        var message = string.Join("\n", uniqueGames.Select(game => game.Name));
+        var messageLines = games
+            .Select((g,i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})");
+        var message = string.Join("\n", messageLines);
         await SendMessage(chatId, message);
     }
 
