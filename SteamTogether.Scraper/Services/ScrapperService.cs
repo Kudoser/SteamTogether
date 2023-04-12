@@ -41,7 +41,7 @@ public class ScrapperService : IScrapperService
     {
         _logger.LogInformation("Starting sync...");
 
-        var syncDate = _dateTimeService.GetCurrentTime().AddSeconds(-_options.SyncPeriodSeconds);
+        var syncDate = _dateTimeService.GetCurrentTime().AddSeconds(-_options.PlayerSyncPeriodSeconds);
         var steamPlayerIds = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
             .Select(player => player.PlayerId)
@@ -65,7 +65,7 @@ public class ScrapperService : IScrapperService
             {
                 throw new EntityNotFoundException(nameof(SteamPlayer));
             }
-            
+
             var ownedGamesRequest = await _steamUserService
                 .GetOwnedGamesAsync(playerId);
 
@@ -74,50 +74,64 @@ public class ScrapperService : IScrapperService
                 .ToArray();
 
             await RemoveDisconnectedGamesFromPlayer(player, ownedGameIds);
-            
+
+            var ownedGames = _dbContext.SteamGames
+                .Where(g => ownedGameIds.Contains(g.GameId))
+                .ToArray();
+
             foreach (var ownedGameId in ownedGameIds)
             {
-                StoreAppDetailsDataModel storeApp;
-                try
-                {
-                    storeApp = await _steamStoreService.GetStoreAppDetailsAsync(ownedGameId);
-                }
-                catch (Exception)
-                {
-                    _logger.LogError("App {AppId} doesn't exist", ownedGameId);
-                    continue;
-                }
-                
-                var multiplayer = storeApp.Categories.Any(
-                    // @todo move constants
-                    category => new uint[] {1, 9, 38}.Contains(category.Id)
-                );
+                _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
 
-                var game = await _dbContext.SteamGames.FindAsync(ownedGameId);
-                if (game == null)
+                var lastGamesSync = _dateTimeService.GetCurrentTime().AddMinutes(-_options.GamesSyncPeriodMinutes);
+                var game = ownedGames.FirstOrDefault(g => g.GameId == ownedGameId);
+                if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
                 {
-                    game = new SteamGame
+                    StoreAppDetailsDataModel storeApp;
+                    try
                     {
-                        GameId = ownedGameId,
-                        SteamAppId = storeApp.SteamAppId,
-                        Name = storeApp.Name,
-                        LastSyncDateTime = _dateTimeService.GetCurrentTime(),
-                        Multiplayer = multiplayer
-                    };
-                    
-                    _logger.LogInformation("Adding GameId={GameId}, Name={Name}", ownedGameId, game.Name);
-                    _dbContext.SteamGames.Add(game);
+                        storeApp = await _steamStoreService.GetStoreAppDetailsAsync(ownedGameId);
+                    }
+                    catch (Exception)
+                    {
+                        _logger.LogError("App {AppId} doesn't exist", ownedGameId);
+                        continue;
+                    }
+
+                    var multiplayer = storeApp.Categories.Any(
+                        // @todo move constants
+                        category => new uint[] {1, 9, 38}.Contains(category.Id)
+                    );
+
+                    if (game == null)
+                    {
+                        game = new SteamGame
+                        {
+                            GameId = ownedGameId,
+                            SteamAppId = storeApp.SteamAppId,
+                            Name = storeApp.Name,
+                            Multiplayer = multiplayer
+                        };
+
+                        _logger.LogInformation("Adding GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                        _dbContext.SteamGames.Add(game);
+                    }
+                    else
+                    {
+                        game.SteamAppId = storeApp.SteamAppId;
+                        game.Name = storeApp.Name;
+                        game.Multiplayer = multiplayer;
+
+                        _logger.LogInformation("Updating GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                        _dbContext.SteamGames.Update(game);
+                    }
                 }
                 else
                 {
-                    game.SteamAppId = storeApp.SteamAppId;
-                    game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
-                    game.Name = storeApp.Name;
-                    game.Multiplayer = multiplayer;
-
-                    _logger.LogInformation("Updating GameId={GameId}, Name={Name}", ownedGameId, game.Name);
-                    _dbContext.SteamGames.Update(game);
+                    _logger.LogInformation("Up to date, last synced at {LastUpdated}", game.LastSyncDateTime);
                 }
+                
+                game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
 
                 var connected = player.Games
                     .Select(g => g.GameId)
@@ -127,8 +141,9 @@ public class ScrapperService : IScrapperService
                 {
                     _logger.LogInformation("Adding GameId={GameId} to player {Name}", ownedGameId, player.Name);
                     player.Games.Add(game);
-                    player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
                 }
+                
+                player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
             }
 
             var count = await _dbContext.SaveChangesAsync();
@@ -151,9 +166,35 @@ public class ScrapperService : IScrapperService
             {
                 player.Games.Remove(notOwnedGame);
             }
-                
+
             await _dbContext.SaveChangesAsync();
         }
+    }
 
+    private async Task<SteamGame> GetSteamGame(uint gameId)
+    {
+        StoreAppDetailsDataModel storeApp;
+        try
+        {
+            storeApp = await _steamStoreService.GetStoreAppDetailsAsync(gameId);
+        }
+        catch (Exception)
+        {
+            _logger.LogError("App {AppId} doesn't exist", gameId);
+            throw;
+        }
+
+        var multiplayer = storeApp.Categories.Any(
+            // @todo move constants
+            category => new uint[] {1, 9, 38}.Contains(category.Id)
+        );
+
+        return new SteamGame
+        {
+            SteamAppId = storeApp.SteamAppId,
+            Name = storeApp.Name,
+            LastSyncDateTime = _dateTimeService.GetCurrentTime(),
+            Multiplayer = multiplayer
+        };
     }
 }
