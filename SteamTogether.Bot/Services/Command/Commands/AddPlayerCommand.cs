@@ -60,7 +60,7 @@ public class AddPlayerListCommand : ITelegramCommand
             // @todo add public API Key support
             if (steamWebResponse.Data.ProfileVisibility != ProfileVisibility.Public)
             {
-                await SendMessage(chatId, $"Steam profile is not public");
+                await SendMessage(chatId, $"{steamWebResponse.Data.Nickname}'s steam profile is not public");
                 return;
             }
 
