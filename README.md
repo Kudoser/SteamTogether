@@ -4,9 +4,9 @@ Telegram bot which helps to organize online game sessions with buddies.
 
 ## Usage
 
-Add @SteamTogetherBot to your group chat and type `/help` to get list of available commands.
+Add @SteamTogetherBot to your group chat and type `/help` to get a list of available commands.
 
-TODO: add here the output of `/help` command.
+TODO: add here the output of the `/help` command.
 
 ## Development
 
@@ -19,21 +19,24 @@ There are the following projects:
 
 See the corresponding readme files for more info.
 
-## Database 
+## Database
 
 ### Migrations
 
-Go to SteamTogether.Core project
+Go to SteamTogether.Core project:
+
 ```shell
 > cd SteamTogether.Core
 ```
 
-make changes to models and create migration
+Make changes to models and create a migration:
+
 ```shell
 > dotnet ef migrations Add MyMigrationName --project SteamTogether.Core.csproj --startup-project ../SteamTogether.Bot/SteamTogether.Bot.csproj
 ```
 
-Apply changes to a database
+Apply changes to a database:
+
 ```shell
 > dotnet ef database update --project SteamTogether.Core.csproj --startup-project ../SteamTogether.Bot/SteamTogether.Bot.csproj
 ```
