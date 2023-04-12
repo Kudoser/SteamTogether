@@ -35,7 +35,6 @@ public class PlayCommand : ITelegramCommand
             .ThenInclude(player => player.Games.Where(game => game.Multiplayer))
             .FirstOrDefault();
 
-
         var games = new List<SteamGame>();
         foreach (var player in chat.Players)
         {
