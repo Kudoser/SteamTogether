@@ -53,8 +53,10 @@ public class ScrapperService : IScrapperService
             return;
         }
 
+        var allGames = _dbContext.SteamGames.ToArray();
         foreach (var player in steamPlayers)
         {
+            _logger.LogInformation("Processing player Name={Name}", player.Name);
             var ownedGamesRequest = await _steamUserService
                 .GetOwnedGamesAsync(player.PlayerId);
 
@@ -63,13 +65,13 @@ public class ScrapperService : IScrapperService
                 .ToArray();
 
             await RemoveDisconnectedGamesFromPlayer(player, ownedGameIds);
-
+            
             foreach (var ownedGameId in ownedGameIds)
             {
                 _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
 
                 var lastGamesSync = _dateTimeService.GetCurrentTime().AddMinutes(-_options.GamesSyncPeriodMinutes);
-                var game = player.Games.FirstOrDefault(g => g.GameId == ownedGameId);
+                var game = allGames.FirstOrDefault(g => g.GameId == ownedGameId);
                 if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
                 {
                     StoreAppDetailsDataModel storeApp;
@@ -130,10 +132,10 @@ public class ScrapperService : IScrapperService
             }
 
             player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
-            var count = await _dbContext.SaveChangesAsync();
-            _logger.LogInformation("{Count} games for player {Name} were synced", count, player.Name);
         }
-
+        
+        var count = await _dbContext.SaveChangesAsync();
+        _logger.LogInformation("{Count} items over all were saved", count);
         _logger.LogInformation("Done");
     }
 
