@@ -38,11 +38,11 @@ public class PlayCommand : ITelegramCommand
         ArgumentNullException.ThrowIfNull(chat);
 
         var games = chat.Players.SelectMany(player => player.Games,
-                (player, game) => new {PlayerName = player.Name, GameName = game.Name})
-            .GroupBy(p => p.GameName)
+                (player, game) => new {PlayerName = player.Name, GameName = game.Name, game.GameId})
+            .GroupBy(p => new {p.GameId, p.GameName})
             .Select(g =>
             new {
-                Name = g.Key,
+                Name = g.Key.GameName,
                 Count = g.Count(),
                 Players = string.Join(",", g.Select(p => p.PlayerName)) 
             })
