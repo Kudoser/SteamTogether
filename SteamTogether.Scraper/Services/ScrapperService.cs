@@ -42,32 +42,22 @@ public class ScrapperService : IScrapperService
         _logger.LogInformation("Starting sync...");
 
         var syncDate = _dateTimeService.GetCurrentTime().AddSeconds(-_options.PlayerSyncPeriodSeconds);
-        var steamPlayerIds = _dbContext.SteamPlayers
+        var steamPlayers = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
-            .Select(player => player.PlayerId)
+            .Include(player => player.Games)
             .Take(_options.PlayersPerRun)
             .ToArray();
 
-        if (!steamPlayerIds.Any())
+        if (!steamPlayers.Any())
         {
             _logger.LogInformation("Nothing to process");
             return;
         }
 
-        foreach (var playerId in steamPlayerIds)
+        foreach (var player in steamPlayers)
         {
-            var player = _dbContext.SteamPlayers
-                .Where(player => player.PlayerId == playerId)
-                .Include(player => player.Games)
-                .FirstOrDefault();
-
-            if (player == null)
-            {
-                throw new EntityNotFoundException(nameof(SteamPlayer));
-            }
-
             var ownedGamesRequest = await _steamUserService
-                .GetOwnedGamesAsync(playerId);
+                .GetOwnedGamesAsync(player.PlayerId);
 
             var ownedGameIds = ownedGamesRequest.Data.OwnedGames
                 .Select(o => o.AppId)
