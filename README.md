@@ -35,7 +35,7 @@ make changes to models and create migration
 
 Apply changes to a database
 ```shell
-> dotnet ef database update Init --project SteamTogether.Core.csproj --startup-project ../SteamTogether.Bot/SteamTogether.Bot.csproj
+> dotnet ef database update --project SteamTogether.Core.csproj --startup-project ../SteamTogether.Bot/SteamTogether.Bot.csproj
 ```
 
 [EF migrations documentation link](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli)
