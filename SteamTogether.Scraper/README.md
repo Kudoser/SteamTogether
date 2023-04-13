@@ -16,24 +16,27 @@ Scrape games from steam
   - as a command line argument:
 
     ```shell
-    > .\SteamTogether.Bot.exe  --Scraper:Schedule="* */5 * * *" --Steam:ApiKey="YOUR_API_KEY" --Database:ConnectionString="Data Source=together.db"
+    > .\SteamTogether.Bot.exe
+          --Scraper:Schedule="* */5 * * *"
+          --Steam:ApiKey="YOUR_API_KEY"
+          --Database:ConnectionString="Data Source=together.db"
     ```
 
   - or as an environment variable:
 
     ```shell
     > set SCRAPER_Steam__ApiKey="YOUR_API_KEY"
-    > set SCRAPER_Scraper__Schedule="* */5 * * *"
-    > set BOT_Database__ConnectionString="Data Source=together.db"
+    > set SCRAPER_Scraper__Schedule="0 */5 * * *"
+    > set SCRAPER_Database__ConnectionString="Data Source=together.db"
     > .\SteamTogether.Bot.exe
     ```
 
 ### Arguments
 
-- `Schedule` - sets a schedule on which to run scraping.
-  Uses crontab format, for example `"* */5 * * *"` will run scrapper every 5 hours.
+- `Schedule` (required) - sets a schedule on which to run scraping.
+  Uses crontab format, for example, `0 */5 * * *` will run scrapper every 5 hours.
   See [implementation](https://github.com/atifaziz/NCrontab#ncrontab-crontab-for-net) for more details.
-- `RunOnStartup` - if set to `true`, runs scraping right after the host is started, in addition to the schedule.
+- `RunOnStartup` - if set to `true`, runs scraping right after the host is started, in addition to the schedule, default = false.
 - `PlayersSyncPeriodSeconds` - a period in seconds to sync players, default = 18000 (5 hours).
 - `GamesSyncPeriodMinutes` - a period in minutes to sync games, default = 10080 (7 days).
-- `PlayersPerRun` - how many players to process per one run.
+- `PlayersPerRun` - how many players to process per one run, default = 10.
