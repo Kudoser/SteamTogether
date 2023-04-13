@@ -63,8 +63,6 @@ public class ScrapperService : IScrapperService
             var ownedGameIds = ownedGamesRequest.Data.OwnedGames
                 .Select(o => o.AppId)
                 .ToArray();
-
-            await RemoveDisconnectedGamesFromPlayer(player, ownedGameIds);
             
             foreach (var ownedGameId in ownedGameIds)
             {
@@ -138,23 +136,5 @@ public class ScrapperService : IScrapperService
         var count = await _dbContext.SaveChangesAsync();
         _logger.LogInformation("{Count} items over all were saved", count);
         _logger.LogInformation("Done");
-    }
-
-    private async Task RemoveDisconnectedGamesFromPlayer(SteamPlayer player, uint[] ownedGameIds)
-    {
-        var notOwnedGames = player.Games
-            .Where(game => !ownedGameIds.Contains(game.GameId))
-            .ToArray();
-
-        if (notOwnedGames.Any())
-        {
-            _logger.LogInformation("Removing {Count} games from player {Name}", notOwnedGames.Length, player.Name);
-            foreach (var notOwnedGame in notOwnedGames)
-            {
-                player.Games.Remove(notOwnedGame);
-            }
-
-            await _dbContext.SaveChangesAsync();
-        }
     }
 }
