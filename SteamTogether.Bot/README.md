@@ -16,13 +16,17 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
   - as a command line argument:
 
     ```shell
-    > .\SteamTogether.Bot.exe  --Telegram:Token="YOUR_TOKEN" --Database:ConnectionString="Data Source=together.db"
+    > .\SteamTogether.Bot.exe
+        --Telegram:Token="YOUR_TOKEN"
+        --Steam:ApiKey="YOUR_STEAM_API_KEY"
+        --Database:ConnectionString="Data Source=together.db"
     ```
 
   - or as an environment variable:
 
     ```shell
     > set BOT_Telegram__Token="YOUR_TELEGRAM_TOKEN"
+    > set BOT_Steam__ApiKey="YOUR_STEAM_API_KEY"
     > set BOT_Database__ConnectionString="Data Source=together.db"
     > .\SteamTogether.Bot.exe
     ```
