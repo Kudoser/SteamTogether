@@ -40,7 +40,9 @@ public class ScrapperService : IScrapperService
     {
         _logger.LogInformation("Starting sync...");
 
-        var syncDate = _dateTimeService.GetCurrentTime().AddSeconds(-_options.PlayerSyncPeriodSeconds);
+        var syncDate = _dateTimeService
+            .GetCurrentTime()
+            .AddSeconds(-_options.PlayerSyncPeriodSeconds);
         var steamPlayers = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
             .Include(player => player.Games)
@@ -57,18 +59,17 @@ public class ScrapperService : IScrapperService
         foreach (var player in steamPlayers)
         {
             _logger.LogInformation("Processing player Name={Name}", player.Name);
-            var ownedGamesRequest = await _steamUserService
-                .GetOwnedGamesAsync(player.PlayerId);
+            var ownedGamesRequest = await _steamUserService.GetOwnedGamesAsync(player.PlayerId);
 
-            var ownedGameIds = ownedGamesRequest.Data.OwnedGames
-                .Select(o => o.AppId)
-                .ToArray();
-            
+            var ownedGameIds = ownedGamesRequest.Data.OwnedGames.Select(o => o.AppId).ToArray();
+
             foreach (var ownedGameId in ownedGameIds)
             {
                 _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
 
-                var lastGamesSync = _dateTimeService.GetCurrentTime().AddMinutes(-_options.GamesSyncPeriodMinutes);
+                var lastGamesSync = _dateTimeService
+                    .GetCurrentTime()
+                    .AddMinutes(-_options.GamesSyncPeriodMinutes);
                 var game = allGames.FirstOrDefault(g => g.GameId == ownedGameId);
                 if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
                 {
@@ -85,7 +86,7 @@ public class ScrapperService : IScrapperService
 
                     var multiplayer = storeApp.Categories.Any(
                         // @todo move constants
-                        category => new uint[] {1, 9, 38}.Contains(category.Id)
+                        category => new uint[] { 1, 9, 38 }.Contains(category.Id)
                     );
 
                     if (game == null)
@@ -98,7 +99,11 @@ public class ScrapperService : IScrapperService
                             Multiplayer = multiplayer
                         };
 
-                        _logger.LogInformation("Adding GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                        _logger.LogInformation(
+                            "Adding GameId={GameId}, Name={Name}",
+                            ownedGameId,
+                            game.Name
+                        );
                         allGames.Add(game);
                         _dbContext.SteamGames.Add(game);
                     }
@@ -108,31 +113,40 @@ public class ScrapperService : IScrapperService
                         game.Name = storeApp.Name;
                         game.Multiplayer = multiplayer;
 
-                        _logger.LogInformation("Updating GameId={GameId}, Name={Name}", ownedGameId, game.Name);
+                        _logger.LogInformation(
+                            "Updating GameId={GameId}, Name={Name}",
+                            ownedGameId,
+                            game.Name
+                        );
                         _dbContext.SteamGames.Update(game);
                     }
                 }
                 else
                 {
-                    _logger.LogInformation("Up to date, last synced at {LastUpdated}", game.LastSyncDateTime);
+                    _logger.LogInformation(
+                        "Up to date, last synced at {LastUpdated}",
+                        game.LastSyncDateTime
+                    );
                 }
 
                 game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
 
-                var connected = player.Games
-                    .Select(g => g.GameId)
-                    .Contains(game.GameId);
+                var connected = player.Games.Select(g => g.GameId).Contains(game.GameId);
 
                 if (!connected)
                 {
-                    _logger.LogInformation("Adding GameId={GameId} to player {Name}", ownedGameId, player.Name);
+                    _logger.LogInformation(
+                        "Adding GameId={GameId} to player {Name}",
+                        ownedGameId,
+                        player.Name
+                    );
                     player.Games.Add(game);
                 }
             }
 
             player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
         }
-        
+
         var count = await _dbContext.SaveChangesAsync();
         _logger.LogInformation("{Count} items over all were saved", count);
         _logger.LogInformation("Done");
