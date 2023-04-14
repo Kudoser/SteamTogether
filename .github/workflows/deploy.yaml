@@ -2,9 +2,9 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - master
-      - docker
+    # branches:
+    #   - master
+    #   - docker
     paths:
       - "**.cs"
       - "**.csproj"
