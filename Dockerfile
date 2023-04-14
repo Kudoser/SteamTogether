@@ -43,8 +43,3 @@ FROM runtime as scraper
 WORKDIR /app
 COPY --from=build-scraper /publish .
 ENTRYPOINT ["/app/SteamTogether.Scraper"]
-
-FROM restore AS migrator
-RUN dotnet tool install --global dotnet-ef --no-cache
-ENV PATH="${PATH}:/root/.dotnet/tools"
-ENTRYPOINT [ "/src/docker/migrator.sh" ]

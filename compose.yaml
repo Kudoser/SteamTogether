@@ -4,25 +4,10 @@ services:
       context: .
       dockerfile: Dockerfile
       target: bot
-    depends_on:
-      - migrator
     environment:
       - BOT_TELEGRAM__TOKEN=${BOT_TELEGRAM__TOKEN:?}
       - BOT_STEAM__APIKEY=${BOT_STEAM__APIKEY:?}
-      - BOT_DATABASE__CONNECTIONSTRING="Data Source=/data/database.db"
-    volumes:
-      - data:/data
-
-  migrator:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: migrator
-    deploy:
-      restart_policy:
-        condition: on-failure
-    environment:
-      - BOT_DATABASE__CONNECTIONSTRING="Data Source=/data/database.db"
+      - BOT_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
     volumes:
       - data:/data
 
@@ -32,11 +17,11 @@ services:
       dockerfile: Dockerfile
       target: scraper
     depends_on:
-      - migrator
+      - bot
     environment:
       - SCRAPER_STEAM__APIKEY=${SCRAPER_STEAM__APIKEY:?}
-      - SCRAPER_DATABASE__CONNECTIONSTRING="Data Source=/data/database.db"
-      - SCRAPER_SCRAPER__SCHEDULE="0 */5 * * *" # every 5 hours
+      - SCRAPER_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
+      - SCRAPER_SCRAPER__SCHEDULE=0 */5 * * * # every 5 hours
       - SCRAPER_SCRAPER__RUNONSTARTUP=true
     volumes:
       - data:/data
