@@ -20,10 +20,9 @@ public sealed class PollingWorker : IHostedService
         using var scope = _serviceProvider.CreateScope();
 
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<PollingWorker>>();
-        
         logger.LogInformation("Checking pending migrations");
+        
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
         if (pendingMigrations.Any())
         {
