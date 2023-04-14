@@ -1,0 +1,30 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: bot
+    environment:
+      - BOT_TELEGRAM__TOKEN=${BOT_TELEGRAM__TOKEN:?}
+      - BOT_STEAM__APIKEY=${BOT_STEAM__APIKEY:?}
+      - BOT_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
+    volumes:
+      - data:/data
+
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: scraper
+    depends_on:
+      - bot
+    environment:
+      - SCRAPER_STEAM__APIKEY=${SCRAPER_STEAM__APIKEY:?}
+      - SCRAPER_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
+      - SCRAPER_SCRAPER__SCHEDULE=0 */5 * * * # every 5 hours
+      - SCRAPER_SCRAPER__RUNONSTARTUP=true
+    volumes:
+      - data:/data
+
+volumes:
+  data:

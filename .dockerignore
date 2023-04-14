@@ -1,0 +1,10 @@
+# Ignore everything except C# projects
+**
+!**/*.csproj
+!**/*.sln
+!**/*.cs
+!**/appsettings.*.json
+*/obj/**
+*/bin/**
+
+!docker/**
