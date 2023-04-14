@@ -7,6 +7,12 @@
       "commands": [
         "dotnet-csharpier"
       ]
+    },
+    "dotnet-ef": {
+      "version": "7.0.5",
+      "commands": [
+        "dotnet-ef"
+      ]
     }
   }
 }

@@ -27,7 +27,7 @@ public class PlayersListCommand : ITelegramCommand
     {
         var chat = await _dbContext.TelegramChat
             .Include(chat => chat.Players)
-            .FirstOrDefaultAsync(chat => chat.ChatId == 1);
+            .FirstOrDefaultAsync(chat => chat.ChatId == inputMessage.Chat.Id);
 
         if (chat != null)
         {

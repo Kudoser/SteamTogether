@@ -45,7 +45,7 @@ public class AddPlayerListCommand : ITelegramCommand
             await SendMessage(chatId, "steamId should be a number");
             return;
         }
-        
+
         var player = await _dbContext.SteamPlayers.FindAsync(playerId);
         if (player == null)
         {
@@ -60,7 +60,10 @@ public class AddPlayerListCommand : ITelegramCommand
             // @todo add public API Key support
             if (steamWebResponse.Data.ProfileVisibility != ProfileVisibility.Public)
             {
-                await SendMessage(chatId, $"{steamWebResponse.Data.Nickname}'s steam profile is not public");
+                await SendMessage(
+                    chatId,
+                    $"{steamWebResponse.Data.Nickname}'s steam profile is not public"
+                );
                 return;
             }
 
@@ -76,13 +79,13 @@ public class AddPlayerListCommand : ITelegramCommand
             .Where(chat => chat.ChatId == chatId)
             .Include(chat => chat.Players)
             .FirstOrDefault();
-        
+
         if (chat == null)
         {
-            chat = new TelegramChat {ChatId = chatId};
+            chat = new TelegramChat { ChatId = chatId };
             _dbContext.TelegramChat.Add(chat);
         }
-        
+
         if (chat.Players.FirstOrDefault(p => p.PlayerId == player.PlayerId) != null)
         {
             await SendMessage(chatId, $"player {player.Name} has already been added");

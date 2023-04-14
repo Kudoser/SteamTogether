@@ -34,23 +34,42 @@ public class PlayCommand : ITelegramCommand
             .Include(chat => chat.Players)
             .ThenInclude(player => player.Games)
             .FirstOrDefault();
-        
+
         ArgumentNullException.ThrowIfNull(chat);
 
-        var games = chat.Players.SelectMany(player => player.Games,
-                (player, game) => new {PlayerName = player.Name, GameName = game.Name, game.GameId})
-            .GroupBy(p => new {p.GameId, p.GameName})
-            .Select(g =>
-            new {
-                Name = g.Key.GameName,
-                Count = g.Count(),
-                Players = string.Join(",", g.Select(p => p.PlayerName)) 
-            })
+        var games = chat.Players
+            .SelectMany(
+                player => player.Games,
+                (player, game) =>
+                    new
+                    {
+                        PlayerName = player.Name,
+                        GameName = game.Name,
+                        game.GameId
+                    }
+            )
+            .GroupBy(p => new { p.GameId, p.GameName })
+            .Select(
+                g =>
+                    new
+                    {
+                        Name = g.Key.GameName,
+                        Count = g.Count(),
+                        Players = string.Join(",", g.Select(p => p.PlayerName))
+                    }
+            )
             .OrderByDescending(x => x.Count)
             .Take(15);
 
-        var messageLines = games
-            .Select((g,i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})");
+        if (!games.Any())
+        {
+            await SendMessage(chatId, "No games found");
+            return;
+        }
+
+        var messageLines = games.Select(
+            (g, i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})"
+        );
         var message = string.Join("\n", messageLines);
         await SendMessage(chatId, message);
     }
