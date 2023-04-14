@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+      - docker
+    paths:
+      - "**.cs"
+      - "**.csproj"
+      - "**.sln"
+      - "*/appsettings.*.json"
+      - ".dockerignore"
+      - "Dockerfile"
+      - "compose.yaml"
+      - "docker/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ADDITIONAL_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+
+      - name: Write SSH key to file
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Docker Compose build
+        run: docker-compose build
+        env:
+          DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+
