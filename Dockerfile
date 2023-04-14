@@ -6,6 +6,9 @@ FROM sdk AS restore
 
 WORKDIR /src
 
+COPY . .
+RUN find
+
 # Copy csproj and restore as distinct layers
 COPY SteamTogether.sln .
 COPY SteamTogether.Bot/*.csproj SteamTogether.Bot/
