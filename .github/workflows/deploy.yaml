@@ -34,7 +34,7 @@ jobs:
       - name: Docker Compose build
         run: |
           find
-          docker-compose build
+          docker compose build
         env:
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
 
