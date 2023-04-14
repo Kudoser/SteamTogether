@@ -3,7 +3,7 @@
 !**/*.csproj
 !**/*.sln
 !**/*.cs
-# !**/appsettings.json
+!**/appsettings.*.json
 */obj/**
 */bin/**
 
