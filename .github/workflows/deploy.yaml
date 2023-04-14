@@ -32,9 +32,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Docker Compose build
-        run: |
-          find
-          docker compose build
+        run: docker compose build
         env:
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
 
