@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using SteamTogether.Bot.Services;
+using SteamTogether.Core.Context;
 
 namespace SteamTogether.Bot;
 
@@ -16,8 +18,24 @@ public sealed class PollingWorker : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
-        var telegram = scope.ServiceProvider.GetRequiredService<ITelegramService>();
 
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<PollingWorker>>();
+        
+        logger.LogInformation("Checking pending migrations");
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation("Running pending migrations");
+            await context.Database.MigrateAsync(cancellationToken);
+        }
+        else
+        {
+            logger.LogInformation("Database is up to date");
+        }
+
+        var telegram = scope.ServiceProvider.GetRequiredService<ITelegramService>();
         await telegram.StartReceivingAsync(cancellationToken);
     }
 
