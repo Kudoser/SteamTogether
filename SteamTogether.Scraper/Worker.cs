@@ -1,5 +1,5 @@
+using Cronos;
 using Microsoft.Extensions.Options;
-using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
 
@@ -27,17 +27,21 @@ public class Worker : BackgroundService
             await scraper.RunSync();
         }
 
-        var schedule = NCrontab.CrontabSchedule.Parse(opts.Schedule);
+        var cron = CronExpression.Parse(opts.Schedule);
         while (!stoppingToken.IsCancellationRequested)
         {
-            var dateTimeService = _serviceProvider.GetRequiredService<IDateTimeService>();
-            var now = dateTimeService.GetCurrentTime();
+            var utcNow = DateTime.UtcNow;
+            var utcNext = cron.GetNextOccurrence(utcNow);
 
-            var nextExecutionTime = schedule.GetNextOccurrence(dateTimeService.GetCurrentTime());
-            using var timer = new PeriodicTimer(nextExecutionTime - now);
+            if (utcNext == null)
+            {
+                _logger.LogWarning("No next run found, stopping worker");
+                break;
+            }
 
-            _logger.LogInformation("Next worker run: {Next}", nextExecutionTime);
-            await timer.WaitForNextTickAsync(stoppingToken);
+            _logger.LogInformation("Next worker run: {Next}", utcNext);
+
+            await Task.Delay(utcNext.Value - utcNow, stoppingToken);
 
             await scraper.RunSync();
         }
