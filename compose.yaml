@@ -31,6 +31,7 @@ services:
       - SCRAPER_STEAM__APIKEY=${SCRAPER_STEAM__APIKEY}
       - SCRAPER_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
       - SCRAPER_SCRAPER__RUNONSTARTUP=true
+      - BOT_HEALTHCHECK_URL=http://bot:${BOT_HEALTHCHECK__PORT:?}
     volumes:
       - data:/data
 

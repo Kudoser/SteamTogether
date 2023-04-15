@@ -50,5 +50,6 @@ RUN dotnet publish SteamTogether.Scraper/SteamTogether.Scraper.csproj \
 
 FROM runtime as scraper
 WORKDIR /app
-COPY --from=build-scraper /publish .
-ENTRYPOINT ["/app/SteamTogether.Scraper"]
+COPY --link --from=build-scraper /publish .
+COPY --link docker/scraper/entrypoint.sh .
+ENTRYPOINT ["/app/entrypoint.sh"]
