@@ -28,6 +28,7 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
     > set BOT_Telegram__Token="YOUR_TELEGRAM_TOKEN"
     > set BOT_Steam__ApiKey="YOUR_STEAM_API_KEY"
     > set BOT_Database__ConnectionString="Data Source=together.db"
+    > set BOT_HealthCheck__Port="10090"
     > .\SteamTogether.Bot.exe
     ```
 
