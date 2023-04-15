@@ -6,7 +6,7 @@ services:
       target: bot
     image: kudoser/steam-together-bot:${GIT_COMMIT:-latest}
     healthcheck:
-      test: ["CMD", "curl", "-fsSI", "http://localhost:${BOT_HEALTHCHECK__PORT:?}"]
+      test: curl -fsSI http://localhost:${BOT_HEALTHCHECK__PORT:?} || exit 1
       interval: 10s
       timeout: 3s
       retries: 3
