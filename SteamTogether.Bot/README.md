@@ -46,3 +46,9 @@ help - how to
 list - returns the list of Steam players at the same chat ready to participate
 add - adds a new Steam player id (@todo: and optionally Steam API key). Example: /add 123
 play - provides a list of common multiplayer games
+```
+
+## Health check
+
+Server exposes a health check HTTP endpoint on HealthCheck:Port. 
+Listen to all HTTP requests and replies with HTTP 200
