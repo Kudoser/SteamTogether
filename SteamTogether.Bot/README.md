@@ -52,5 +52,5 @@ play - provides a list of common multiplayer games
 
 ## Health check
 
-Server exposes a health check HTTP endpoint on HealthCheck:Port. 
+The server exposes a health check HTTP endpoint on `HealthCheck:Port`.
 Listen to all HTTP requests and replies with HTTP 200
