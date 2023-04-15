@@ -35,6 +35,7 @@ jobs:
         run: docker compose build
         env:
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          GIT_COMMIT: ${{ github.sha }}
 
       - name: Docker Compose up
         run: docker compose up -d
@@ -42,5 +43,6 @@ jobs:
           BOT_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
           BOT_TELEGRAM__TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          GIT_COMMIT: ${{ github.sha }}
           SCRAPER_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
 
