@@ -13,16 +13,19 @@ FROM sdk AS restore
 WORKDIR /src
 
 # Copy csproj and restore as distinct layers
-COPY SteamTogether.sln .
-COPY SteamTogether.Bot/*.csproj SteamTogether.Bot/
-COPY SteamTogether.Bot.UnitTests/*.csproj SteamTogether.Bot.UnitTests/
-COPY SteamTogether.Core/*.csproj SteamTogether.Core/
-COPY SteamTogether.Scraper/*.csproj SteamTogether.Scraper/
+COPY --link SteamTogether.sln .
+COPY --link SteamTogether.Bot/*.csproj SteamTogether.Bot/
+COPY --link SteamTogether.Bot.UnitTests/*.csproj SteamTogether.Bot.UnitTests/
+COPY --link SteamTogether.Core/*.csproj SteamTogether.Core/
+COPY --link SteamTogether.Scraper/*.csproj SteamTogether.Scraper/
 
 RUN dotnet restore --no-cache
 
 # Copy everything else
-COPY . .
+COPY --link SteamTogether.Bot SteamTogether.Bot
+COPY --link SteamTogether.Bot.UnitTests SteamTogether.Bot.UnitTests
+COPY --link SteamTogether.Core SteamTogether.Core
+COPY --link SteamTogether.Scraper SteamTogether.Scraper
 
 
 FROM restore AS build-bot
@@ -34,7 +37,7 @@ RUN dotnet publish SteamTogether.Bot/SteamTogether.Bot.csproj \
 
 FROM runtime AS bot
 WORKDIR /app
-COPY --from=build-bot /publish .
+COPY --link --from=build-bot /publish .
 ENTRYPOINT ["/app/SteamTogether.Bot"]
 
 
