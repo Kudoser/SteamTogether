@@ -1,5 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS sdk
+
+
 FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime
+# Install curl for the health check
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 
 FROM sdk AS restore
