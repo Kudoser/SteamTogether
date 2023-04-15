@@ -7,12 +7,14 @@ on:
       - "**.cs"
       - "**.csproj"
       - "**.sln"
+      - ".github/workflows/dotnet.yml"
   pull_request:
     branches: [ "*" ]
     paths:
       - "**.cs"
       - "**.csproj"
       - "**.sln"
+      - ".github/workflows/dotnet.yml"
 
 jobs:
   build:
