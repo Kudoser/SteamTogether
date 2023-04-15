@@ -16,7 +16,8 @@ public class HelpCommand : ITelegramCommand
     public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
     {
         var chatId = inputMessage.Chat.Id;
-        var help = @"
+        var help =
+            @"
 How to:
 
 * Get SteamID: https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC

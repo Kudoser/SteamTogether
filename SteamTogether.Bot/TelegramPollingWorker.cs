@@ -20,7 +20,7 @@ public sealed class TelegramPollingWorker : BackgroundService
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<TelegramPollingWorker>>();
         logger.LogInformation("Checking pending migrations");
-        
+
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
         if (pendingMigrations.Any())
         {

@@ -22,7 +22,7 @@ public class TelegramCommandParserTests
     {
         var sut = new TelegramCommandParser();
         var result = sut.Parse(input);
-        
+
         Assert.False(result.Parsed);
     }
 }

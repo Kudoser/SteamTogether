@@ -10,7 +10,10 @@ public class HealthCheckService : IHealthCheckService
     private readonly ILogger<HealthCheckService> _logger;
     private readonly HttpListener _httpListener;
 
-    public HealthCheckService(IOptions<HealthCheckOptions> options, ILogger<HealthCheckService> logger)
+    public HealthCheckService(
+        IOptions<HealthCheckOptions> options,
+        ILogger<HealthCheckService> logger
+    )
     {
         _options = options.Value;
         _logger = logger;
@@ -33,7 +36,7 @@ public class HealthCheckService : IHealthCheckService
         _logger.LogInformation("Health check message received");
         var context = await _httpListener.GetContextAsync();
         var response = context.Response;
-        response.StatusCode = (int) HttpStatusCode.OK;
+        response.StatusCode = (int)HttpStatusCode.OK;
         response.OutputStream.Close();
         response.Close();
         _logger.LogInformation("Response HTTP 200 sent");
