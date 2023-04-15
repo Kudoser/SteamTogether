@@ -70,6 +70,11 @@ public class TelegramService : ITelegramService
         try
         {
             var parsedResult = _telegramCommandParser.Parse(message.Text);
+            if (!parsedResult.Parsed)
+            {
+                return;    
+            }
+            
             var command = _telegramCommandHandler.Resolve(parsedResult.CommandName);
 
             await command.ExecuteAsync(update.Message, parsedResult.Arguments);
