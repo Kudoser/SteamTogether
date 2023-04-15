@@ -34,14 +34,16 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
 
 ## Telegram bot
 
-### How to add list of commands to bot:
-* go to https://t.me/BotFather
-* use command `/setcommands`
-* choose bot
-* post list of supported commands from down below
+### How to define commands for your bot
+
+- go to <https://t.me/BotFather>
+- use command `/setcommands`
+- choose the bot
+- post the list of supported commands from down below
 
 ### Supported commands
-```
+
+```text
 help - how to
 list - returns the list of Steam players at the same chat ready to participate
 add - adds a new Steam player id (@todo: and optionally Steam API key). Example: /add 123
