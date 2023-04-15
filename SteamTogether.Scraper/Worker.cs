@@ -27,6 +27,7 @@ public class Worker : BackgroundService
             await scraper.RunSync();
         }
 
+        _logger.LogInformation("Using schedule: {Schedule}", opts.Schedule);
         var cron = CronExpression.Parse(opts.Schedule);
         while (!stoppingToken.IsCancellationRequested)
         {
