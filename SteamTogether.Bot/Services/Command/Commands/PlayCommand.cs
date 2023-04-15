@@ -39,7 +39,7 @@ public class PlayCommand : ITelegramCommand
 
         var games = chat.Players
             .SelectMany(
-                player => player.Games,
+                player => player.Games.Where(game => game.Multiplayer),
                 (player, game) =>
                     new
                     {
