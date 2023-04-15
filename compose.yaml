@@ -4,6 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: bot
+      cache_from:
+        - kudoser/steam-together-bot:latest
+    image: kudoser/steam-together-bot:${GIT_COMMIT:-latest}
     environment:
       - BOT_TELEGRAM__TOKEN=${BOT_TELEGRAM__TOKEN}
       - BOT_STEAM__APIKEY=${BOT_STEAM__APIKEY}
@@ -16,6 +19,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: scraper
+      cache_from:
+        - kudoser/steam-together-scraper:latest
+    image: kudoser/steam-together-scraper:${GIT_COMMIT:-latest}
     depends_on:
       - bot
     environment:

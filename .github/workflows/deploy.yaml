@@ -35,4 +35,11 @@ jobs:
         run: docker compose build
         env:
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          GIT_COMMIT: ${{ github.sha }}
+
+      - name: Docker Compose up
+        run: docker compose up -d
+        env:
+          DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          GIT_COMMIT: ${{ github.sha }}
 
