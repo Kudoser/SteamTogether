@@ -37,6 +37,6 @@ Scrape games from steam
   Uses crontab format, for example, `0 */5 * * *` will run scrapper every 5 hours.
   See [implementation](https://github.com/atifaziz/NCrontab#ncrontab-crontab-for-net) for more details.
 - `RunOnStartup` - if set to `true`, runs scraping right after the host is started, in addition to the schedule, default = false.
-- `PlayersSyncPeriodSeconds` - a period in seconds to sync players, default = 900 (15 min).
+- `PlayersSyncPeriodSeconds` - a period in seconds to sync players, default = 18000 (5 hours).
 - `GamesSyncPeriodMinutes` - a period in minutes to sync games, default = 10080 (7 days).
 - `PlayersPerRun` - how many players to process per one run, default = 10.
