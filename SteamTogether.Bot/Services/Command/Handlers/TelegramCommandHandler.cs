@@ -46,6 +46,11 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             return new PlayCommand(_telegramClient, _dbContext, logger);
         }
 
+        if (name == HelpCommand.Name)
+        {
+            return new HelpCommand(_telegramClient);
+        }
+
         throw new UnknownCommandException($"Unknown command name={name}]");
     }
 }
