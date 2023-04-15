@@ -23,7 +23,6 @@ services:
     environment:
       - SCRAPER_STEAM__APIKEY=${SCRAPER_STEAM__APIKEY}
       - SCRAPER_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
-      - SCRAPER_SCRAPER__SCHEDULE=0 */5 * * * # every 5 hours
       - SCRAPER_SCRAPER__RUNONSTARTUP=true
     volumes:
       - data:/data
