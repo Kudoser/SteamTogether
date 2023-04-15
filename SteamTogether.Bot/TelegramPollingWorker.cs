@@ -4,23 +4,21 @@ using SteamTogether.Core.Context;
 
 namespace SteamTogether.Bot;
 
-public sealed class PollingWorker : IHostedService
+public sealed class TelegramPollingWorker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger _logger;
 
-    public PollingWorker(IServiceProvider serviceProvider, ILogger<PollingWorker> logger)
+    public TelegramPollingWorker(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _logger = logger;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
 
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<PollingWorker>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<TelegramPollingWorker>>();
         logger.LogInformation("Checking pending migrations");
         
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);
@@ -35,13 +33,9 @@ public sealed class PollingWorker : IHostedService
         }
 
         var telegram = scope.ServiceProvider.GetRequiredService<ITelegramService>();
-        await telegram.StartReceivingAsync(cancellationToken);
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Stopping application...");
-
-        return Task.CompletedTask;
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            await telegram.StartReceivingAsync(cancellationToken);
+        }
     }
 }
