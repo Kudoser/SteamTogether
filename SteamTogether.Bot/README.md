@@ -28,6 +28,7 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
     > set BOT_Telegram__Token="YOUR_TELEGRAM_TOKEN"
     > set BOT_Steam__ApiKey="YOUR_STEAM_API_KEY"
     > set BOT_Database__ConnectionString="Data Source=together.db"
+    > set BOT_HealthCheck__Port="10090"
     > .\SteamTogether.Bot.exe
     ```
 
@@ -48,3 +49,8 @@ list - returns the list of Steam players at the same chat ready to participate
 add - adds a new Steam player id (@todo: and optionally Steam API key). Example: /add 123
 play - provides a list of common multiplayer games
 ```
+
+## Health check
+
+The server exposes a health check HTTP endpoint on `HealthCheck:Port`.
+Listen to all HTTP requests and replies with HTTP 200

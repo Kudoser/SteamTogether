@@ -40,6 +40,10 @@ var host = Host.CreateDefaultBuilder()
                 .AddOptions<SteamOptions>()
                 .Bind(builder.Configuration.GetSection(SteamOptions.Steam))
                 .ValidateDataAnnotations();
+            services
+                .AddOptions<HealthCheckOptions>()
+                .Bind(builder.Configuration.GetSection(HealthCheckOptions.HealthCheck))
+                .ValidateDataAnnotations();
 
             services.RegisterDataServices();
 
@@ -64,8 +68,10 @@ var host = Host.CreateDefaultBuilder()
             services.AddScoped<ITelegramCommandHandler, TelegramCommandHandler>();
             services.AddScoped<ITelegramService, TelegramService>();
             services.AddScoped<ISteamService, SteamService>();
+            services.AddTransient<IHealthCheckService, HealthCheckService>();
 
-            services.AddHostedService<PollingWorker>();
+            services.AddHostedService<TelegramPollingWorker>();
+            services.AddHostedService<HealthCheckWorker>();
         }
     )
     .Build();
