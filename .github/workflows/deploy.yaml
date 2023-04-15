@@ -10,7 +10,7 @@ on:
       - "**.sln"
       - "*/appsettings.*.json"
       - ".dockerignore"
-      - ".github/workflows/deploy.yml"
+      - ".github/workflows/deploy.yaml"
       - "Dockerfile"
       - "compose.yaml"
       - "docker/**"
