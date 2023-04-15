@@ -1,5 +1,4 @@
 using SteamTogether.Bot.Services.Command.Parser;
-using SteamTogether.Core.Exceptions;
 
 namespace SteamTogether.Bot.UnitTests;
 
@@ -22,6 +21,8 @@ public class TelegramCommandParserTests
     public void Command_Should_ThrowException_IfCommandDoesNotStartWithSlashTest(string input)
     {
         var sut = new TelegramCommandParser();
-        Assert.Throws<ParseCommandException>(() => sut.Parse(input));
+        var result = sut.Parse(input);
+        
+        Assert.False(result.Parsed);
     }
 }
