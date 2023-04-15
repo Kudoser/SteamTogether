@@ -17,11 +17,16 @@ public class HelpCommand : ITelegramCommand
     {
         var chatId = inputMessage.Chat.Id;
         var help = @"
-        How to:
+How to:
+
+* Get SteamID: https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC
+* run /add SteamID
+* wait for the next sync (by default it runs every 15 minutes)
+* run /play
         
-        /list - returns players ready to play
-        /add [SteamPlayerId:int] - register to play. Example: /add 123
-        /play - provides a list of common multiplayer games";
+/list - returns players ready to play
+/add [SteamPlayerId:int] - register to play. Example: /add 123
+/play - provides a list of common multiplayer games";
 
         await SendMessage(chatId, help);
     }
