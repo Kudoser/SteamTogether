@@ -55,8 +55,7 @@ jobs:
           format: markdown
           message: |
             🚀 *New deployment* 🚀
-            Branch: `${{ github.head_ref }}`
             Commit: [${{ github.sha }}](${{ github.event.head_commit.url }})
             Commit message: `${{ github.event.head_commit.message }}`
             Author: `${{ github.event.head_commit.author.name }}`
-            Compare changes: [${{ github.base_ref }}...${{ github.head_ref }}](${{ github.event.compare }})
+            [Compare changes](${{ github.event.compare }})
