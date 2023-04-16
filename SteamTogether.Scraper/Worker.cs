@@ -28,15 +28,24 @@ public class Worker : BackgroundService
         }
 
         var schedule = NCrontab.CrontabSchedule.Parse(opts.Schedule);
+        _logger.LogInformation("Worker running at: {Schedule}", opts.Schedule);
         while (!stoppingToken.IsCancellationRequested)
         {
             var dateTimeService = _serviceProvider.GetRequiredService<IDateTimeService>();
             var now = dateTimeService.GetCurrentTime();
 
             var nextExecutionTime = schedule.GetNextOccurrence(dateTimeService.GetCurrentTime());
+
+            var period = nextExecutionTime - now;
+            _logger.LogInformation(
+                "Periodic timer debug: {Next} - {Now} = {Period}",
+                nextExecutionTime,
+                now,
+                period
+            );
+
             using var timer = new PeriodicTimer(nextExecutionTime - now);
 
-            _logger.LogInformation("Next worker run: {Next}", nextExecutionTime);
             await timer.WaitForNextTickAsync(stoppingToken);
 
             await scraper.RunSync();
