@@ -44,6 +44,13 @@ public class Worker : BackgroundService
                 period
             );
 
+            _logger.LogInformation(
+                "Periodic timer debug: {Next} - {Now} = {Period}",
+                nextExecutionTime.Ticks,
+                now.Ticks,
+                period.Ticks
+            );
+
             using var timer = new PeriodicTimer(nextExecutionTime - now);
 
             await timer.WaitForNextTickAsync(stoppingToken);
