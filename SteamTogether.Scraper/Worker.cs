@@ -1,5 +1,6 @@
 using Cronos;
 using Microsoft.Extensions.Options;
+using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
 
@@ -9,10 +10,16 @@ public class Worker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<Worker> _logger;
+    private readonly IDateTimeService _dateTimeService;
 
-    public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger)
+    public Worker(
+        IDateTimeService dateTimeService,
+        ILogger<Worker> logger,
+        IServiceProvider serviceProvider
+    )
     {
         _serviceProvider = serviceProvider.CreateScope().ServiceProvider;
+        _dateTimeService = dateTimeService;
         _logger = logger;
     }
 
@@ -31,7 +38,7 @@ public class Worker : BackgroundService
         var cron = CronExpression.Parse(opts.Schedule);
         while (!stoppingToken.IsCancellationRequested)
         {
-            var utcNow = DateTime.UtcNow;
+            var utcNow = _dateTimeService.UtcNow;
             var utcNext = cron.GetNextOccurrence(utcNow);
 
             if (utcNext == null)
@@ -40,7 +47,8 @@ public class Worker : BackgroundService
                 break;
             }
 
-            _logger.LogInformation("Next worker run: {Next}", utcNext);
+            var delay = utcNext.Value - utcNow;
+            _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext.Value, delay);
 
             await Task.Delay(utcNext.Value - utcNow, stoppingToken);
 

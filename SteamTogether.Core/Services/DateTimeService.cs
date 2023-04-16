@@ -2,15 +2,15 @@
 
 public class DateTimeService : IDateTimeService
 {
-    private readonly DateTime _now;
+    private readonly DateTime? _now;
 
     public DateTimeService(DateTime? now = null)
     {
-        _now = now ?? DateTime.UtcNow;
+        _now = now;
     }
 
-    public DateTime GetCurrentTime()
+    public DateTime UtcNow
     {
-        return _now;
+        get => _now ?? DateTime.UtcNow;
     }
 }
