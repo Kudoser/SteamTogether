@@ -40,9 +40,7 @@ public class ScrapperService : IScrapperService
     {
         _logger.LogInformation("Starting sync...");
 
-        var syncDate = _dateTimeService
-            .GetCurrentTime()
-            .AddSeconds(-_options.PlayerSyncPeriodSeconds);
+        var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
         var steamPlayers = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
             .Include(player => player.Games)
@@ -67,9 +65,9 @@ public class ScrapperService : IScrapperService
             {
                 _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
 
-                var lastGamesSync = _dateTimeService
-                    .GetCurrentTime()
-                    .AddMinutes(-_options.GamesSyncPeriodMinutes);
+                var lastGamesSync = _dateTimeService.UtcNow.AddMinutes(
+                    -_options.GamesSyncPeriodMinutes
+                );
                 var game = allGames.FirstOrDefault(g => g.GameId == ownedGameId);
                 if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
                 {
@@ -129,7 +127,7 @@ public class ScrapperService : IScrapperService
                     );
                 }
 
-                game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
+                game.LastSyncDateTime = _dateTimeService.UtcNow;
 
                 var connected = player.Games.Select(g => g.GameId).Contains(game.GameId);
 
@@ -144,7 +142,7 @@ public class ScrapperService : IScrapperService
                 }
             }
 
-            player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
+            player.LastSyncDateTime = _dateTimeService.UtcNow;
         }
 
         var count = await _dbContext.SaveChangesAsync();

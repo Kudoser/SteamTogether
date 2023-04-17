@@ -38,6 +38,7 @@ var host = Host.CreateDefaultBuilder(args)
             services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
 
             services.AddHttpClient();
+            // TODO(@ablizorukov): Make it non-transient?
             services.AddTransient<IDateTimeService, DateTimeService>();
             services.AddTransient<IScrapperService, ScrapperService>();
             services.AddTransient<ISteamService, SteamService>();
