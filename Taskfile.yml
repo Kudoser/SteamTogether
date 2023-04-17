@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: '3'
+
+silent: true
+
+tasks:
+  default: "${GOTASK_BIN:-task} --list"
+
+  compose:build:
+    desc: Build images with docker-compose
+    summary: Builds the images from the compose.yaml file.
+    cmds:
+      - docker-compose build
+    env:
+      VERSION:
+        sh: ./scripts/version.sh
+
+  compose:up:
+    desc: Start docker services with docker-compose
+    summary: Starts the docker services from the compose.yaml file.
+    cmds:
+      - docker-compose up -d
+    env:
+      VERSION:
+        sh: ./scripts/version.sh

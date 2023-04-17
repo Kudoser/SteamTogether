@@ -34,38 +34,24 @@ jobs:
 
       - name: Generate version number
         id: version
-        run: |
-          TAG=$(git describe --abbrev=0 --tags 2>/dev/null)
-          if [ -n "$TAG" ] && git describe --exact-match &>/dev/null; then
-              VERSION=$TAG
-          else
-              SHORT_SHA=$(git rev-parse --short HEAD)
-              if [ -z "$TAG" ]; then
-                  COMMITS_SINCE_BEGINNING=$(git rev-list --count HEAD 2>/dev/null)
-                  VERSION="0.0.0.$COMMITS_SINCE_BEGINNING-$SHORT_SHA"
-              else
-                  COMMITS_SINCE_TAG=$(git rev-list --count HEAD ^$TAG 2>/dev/null)
-                  VERSION="$TAG.$COMMITS_SINCE_TAG-$SHORT_SHA"
-              fi
-          fi
-          echo "::set-output name=version::$VERSION"
+        run: echo "::set-output name=version::$(scripts/version.sh)"
 
       - name: Docker Compose build
-        run: docker compose build --build-arg VERSION=${{ steps.version.outputs.version }}
+        run: docker compose build
         env:
-          DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
-          GIT_COMMIT: ${{ github.sha }}
           BOT_HEALTHCHECK__PORT: 10090
+          DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Docker Compose up
         run: docker compose up -d
         env:
+          BOT_HEALTHCHECK__PORT: 10090
           BOT_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
           BOT_TELEGRAM__TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
-          GIT_COMMIT: ${{ github.sha }}
           SCRAPER_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
-          BOT_HEALTHCHECK__PORT: 10090
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Notify Telegram
         uses: appleboy/telegram-action@master
