@@ -6,7 +6,6 @@ using SteamTogether.Core.Models;
 using SteamTogether.Core.Services;
 using SteamTogether.Core.Services.Steam;
 using SteamTogether.Scraper.Options;
-using SteamWebAPI2.Interfaces;
 
 namespace SteamTogether.Scraper.Services;
 
@@ -14,10 +13,9 @@ public class ScrapperService : IScrapperService
 {
     private readonly ScraperOptions _options;
     private readonly ApplicationDbContext _dbContext;
+    private readonly ISteamService _steamService;
     private readonly IDateTimeService _dateTimeService;
     private readonly ILogger<ScrapperService> _logger;
-    private readonly PlayerService _steamUserService;
-    private readonly SteamStore _steamStoreService;
 
     public ScrapperService(
         ISteamService steamService,
@@ -29,11 +27,9 @@ public class ScrapperService : IScrapperService
     {
         _options = options.Value;
         _dbContext = dbContextFactory.CreateDbContext();
+        _steamService = steamService;
         _dateTimeService = dateTimeService;
         _logger = logger;
-
-        _steamUserService = steamService.GetSteamUserWebInterface<PlayerService>();
-        _steamStoreService = steamService.CreateSteamStoreInterface();
     }
 
     public async Task RunSync()
@@ -57,7 +53,7 @@ public class ScrapperService : IScrapperService
         foreach (var player in steamPlayers)
         {
             _logger.LogInformation("Processing player Name={Name}", player.Name);
-            var ownedGamesRequest = await _steamUserService.GetOwnedGamesAsync(player.PlayerId);
+            var ownedGamesRequest = await _steamService.GetOwnedGamesAsync(player.PlayerId);
 
             var ownedGameIds = ownedGamesRequest.Data.OwnedGames.Select(o => o.AppId).ToArray();
 
@@ -74,7 +70,7 @@ public class ScrapperService : IScrapperService
                     StoreAppDetailsDataModel storeApp;
                     try
                     {
-                        storeApp = await _steamStoreService.GetStoreAppDetailsAsync(ownedGameId);
+                        storeApp = await _steamService.GetAppDetailsAsync(ownedGameId);
                     }
                     catch (Exception)
                     {
