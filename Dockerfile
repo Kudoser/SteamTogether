@@ -36,7 +36,7 @@ RUN dotnet publish SteamTogether.Bot/SteamTogether.Bot.csproj \
     --configuration Release \
     --output /publish \
     --no-restore \
-    /p:Version=$VERSION
+    -p:Version=$VERSION
 
 
 FROM runtime AS bot
@@ -51,7 +51,7 @@ RUN dotnet publish SteamTogether.Scraper/SteamTogether.Scraper.csproj \
     --configuration Release \
     --output /publish \
     --no-restore \
-    /p:Version=$VERSION
+    -p:Version=$VERSION
 
 
 FROM runtime as scraper
