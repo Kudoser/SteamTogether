@@ -25,7 +25,7 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(
         (builder, services) =>
         {
-            services.RegisterDataServices();
+            services.RegisterDatabaseServices();
 
             services
                 .AddOptions<ScraperOptions>()
@@ -39,9 +39,9 @@ var host = Host.CreateDefaultBuilder(args)
 
             services.AddHttpClient();
             // TODO(@ablizorukov): Make it non-transient?
-            services.AddTransient<IDateTimeService, DateTimeService>();
-            services.AddTransient<IScrapperService, ScrapperService>();
-            services.AddTransient<ISteamService, SteamService>();
+            services.AddSingleton<IDateTimeService, DateTimeService>();
+            services.AddSingleton<IScrapperService, ScrapperService>();
+            services.AddSingleton<ISteamService, SteamService>();
             services.AddHostedService<Worker>();
         }
     )

@@ -1,4 +1,5 @@
-﻿using SteamTogether.Bot.Services.Command.Commands;
+﻿using Microsoft.EntityFrameworkCore;
+using SteamTogether.Bot.Services.Command.Commands;
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Exceptions;
 using SteamTogether.Core.Services.Steam;
@@ -15,15 +16,16 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
     public TelegramCommandHandler(
         ITelegramBotClient telegramClient,
-        ApplicationDbContext dbContext,
+        IDbContextFactory<ApplicationDbContext> _dbContextFactory,
         ISteamService steamService,
         ILoggerFactory loggerFactory
     )
     {
         _telegramClient = telegramClient;
-        _dbContext = dbContext;
         _steamService = steamService;
         _loggerFactory = loggerFactory;
+        
+        _dbContext = _dbContextFactory.CreateDbContext();
     }
 
     public ITelegramCommand Resolve(string name)

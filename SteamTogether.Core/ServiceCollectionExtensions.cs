@@ -8,9 +8,9 @@ namespace SteamTogether.Core;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection RegisterDataServices(this IServiceCollection services)
+    public static IServiceCollection RegisterDatabaseServices(this IServiceCollection services)
     {
-        services.AddDbContext<ApplicationDbContext>(
+        services.AddDbContextFactory<ApplicationDbContext>(
             (provider, dbOptions) =>
             {
                 var opts = provider.GetRequiredService<IOptions<DatabaseOptions>>();

@@ -22,13 +22,13 @@ public class ScrapperService : IScrapperService
     public ScrapperService(
         ISteamService steamService,
         IOptions<ScraperOptions> options,
-        ApplicationDbContext dbContext,
+        IDbContextFactory<ApplicationDbContext> dbContextFactory,
         IDateTimeService dateTimeService,
         ILogger<ScrapperService> logger
     )
     {
         _options = options.Value;
-        _dbContext = dbContext;
+        _dbContext = dbContextFactory.CreateDbContext();
         _dateTimeService = dateTimeService;
         _logger = logger;
 
