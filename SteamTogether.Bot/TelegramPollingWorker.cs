@@ -19,7 +19,8 @@ public sealed class TelegramPollingWorker : BackgroundService
         using var scope = _serviceProvider.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<TelegramPollingWorker>>();
         logger.LogInformation(
-            "SteamTogether.Bot v{Version}",
+            "{Name} v{Version}",
+            Assembly.GetExecutingAssembly().GetName().Name,
             Assembly
                 .GetExecutingAssembly()
                 .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
