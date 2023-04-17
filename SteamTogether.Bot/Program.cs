@@ -5,6 +5,7 @@ using SteamTogether.Bot.Services;
 using SteamTogether.Bot.Services.Command.Handlers;
 using SteamTogether.Bot.Services.Command.Parser;
 using SteamTogether.Core;
+using SteamTogether.Core.Logging;
 using SteamTogether.Core.Options;
 using SteamTogether.Core.Services.Steam;
 using Telegram.Bot;
@@ -23,6 +24,51 @@ var host = Host.CreateDefaultBuilder()
                 )
                 .AddEnvironmentVariables(prefix: "BOT_")
                 .AddCommandLine(args);
+        }
+    )
+    .ConfigureLogging(
+        (context, logging) =>
+        {
+            logging.ClearProviders();
+            logging.AddProvider(
+                new FilteredConsoleLoggerProvider(
+                    (category, level) =>
+                    {
+                        if (level == LogLevel.None)
+                        {
+                            return false;
+                        }
+
+                        if (category == typeof(SteamService).FullName)
+                        {
+                            return level == LogLevel.Information;
+                        }
+
+                        if (category == typeof(TelegramService).FullName)
+                        {
+                            return level == LogLevel.Information;
+                        }
+
+                        if (category == typeof(HealthCheckService).FullName)
+                        {
+                            return level == LogLevel.Information;
+                        }
+
+                        if (category == typeof(TelegramPollingWorker).FullName)
+                        {
+                            return level == LogLevel.Information;
+                        }
+
+                        if (category == typeof(HealthCheckWorker).FullName)
+                        {
+                            return level == LogLevel.Information;
+                        }
+
+                        return true;
+                    },
+                    true
+                )
+            );
         }
     )
     .ConfigureServices(
