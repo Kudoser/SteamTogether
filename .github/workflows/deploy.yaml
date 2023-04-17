@@ -32,8 +32,26 @@ jobs:
           echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+      - name: Generate version number
+        id: version
+        run: |
+          TAG=$(git describe --abbrev=0 --tags 2>/dev/null)
+          if [ -n "$TAG" ] && git describe --exact-match &>/dev/null; then
+              VERSION=$TAG
+          else
+              SHORT_SHA=$(git rev-parse --short HEAD)
+              if [ -z "$TAG" ]; then
+                  COMMITS_SINCE_BEGINNING=$(git rev-list --count HEAD 2>/dev/null)
+                  VERSION="0.0.0.$COMMITS_SINCE_BEGINNING-$SHORT_SHA"
+              else
+                  COMMITS_SINCE_TAG=$(git rev-list --count HEAD ^$TAG 2>/dev/null)
+                  VERSION="$TAG.$COMMITS_SINCE_TAG-$SHORT_SHA"
+              fi
+          fi
+          echo "::set-output name=version::$VERSION"
+
       - name: Docker Compose build
-        run: docker compose build
+        run: docker compose build --build-arg VERSION=${{ steps.version.outputs.version }}
         env:
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
           GIT_COMMIT: ${{ github.sha }}

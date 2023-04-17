@@ -31,10 +31,12 @@ COPY --link SteamTogether.Scraper SteamTogether.Scraper
 
 
 FROM restore AS build-bot
+ARG VERSION=¯\_(ツ)_/¯
 RUN dotnet publish SteamTogether.Bot/SteamTogether.Bot.csproj \
     --configuration Release \
     --output /publish \
-    --no-restore
+    --no-restore \
+    /p:Version=$VERSION
 
 
 FROM runtime AS bot
@@ -44,10 +46,12 @@ ENTRYPOINT ["/app/SteamTogether.Bot"]
 
 
 FROM restore AS build-scraper
+ARG VERSION=¯\_(ツ)_/¯
 RUN dotnet publish SteamTogether.Scraper/SteamTogether.Scraper.csproj \
     --configuration Release \
     --output /publish \
-    --no-restore
+    --no-restore \
+    /p:Version=$VERSION
 
 
 FROM runtime as scraper
