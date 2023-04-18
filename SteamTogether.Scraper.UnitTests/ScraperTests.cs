@@ -15,7 +15,7 @@ using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
 using SteamWebAPI2.Utilities;
 
-namespace SteamTogether.Scraper.IntegrationTests;
+namespace SteamTogether.Scraper.UnitTests;
 
 public class ScraperTests
 {
