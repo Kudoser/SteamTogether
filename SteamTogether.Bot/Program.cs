@@ -62,7 +62,6 @@ var host = Host.CreateDefaultBuilder()
                         return new TelegramBotClient(token, httpClient);
                     }
                 )
-                .RedactLoggedHeaders(new string[] {}) // @todo check
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
             services.AddScoped<ITelegramCommandParser, TelegramCommandParser>();
