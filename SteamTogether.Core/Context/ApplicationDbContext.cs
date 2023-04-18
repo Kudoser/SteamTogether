@@ -53,11 +53,8 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (string.IsNullOrEmpty(_options.ConnectionString))
-        {
-            throw new ArgumentException(nameof(_options.ConnectionString));
-        }
-
+        ArgumentException.ThrowIfNullOrEmpty(_options.ConnectionString);
+        
         optionsBuilder.UseSqlite(_options.ConnectionString);
     }
 }

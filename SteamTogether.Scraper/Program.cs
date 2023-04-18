@@ -25,8 +25,6 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(
         (builder, services) =>
         {
-            services.RegisterDatabaseServices();
-
             services
                 .AddOptions<ScraperOptions>()
                 .Bind(builder.Configuration.GetSection(ScraperOptions.Scraper))
@@ -38,9 +36,11 @@ var host = Host.CreateDefaultBuilder(args)
             services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
 
             services.AddHttpClient();
-            services.AddSingleton<IDateTimeService, DateTimeService>();
-            services.AddSingleton<IScrapperService, ScrapperService>();
-            services.AddSingleton<ISteamService, SteamService>();
+            services.AddScoped<IDateTimeService, DateTimeService>();
+            services.AddScoped<IScrapperService, ScrapperService>();
+            services.AddScoped<ISteamService, SteamService>();
+            
+            services.RegisterDatabaseServices();
             services.AddHostedService<Worker>();
         }
     )

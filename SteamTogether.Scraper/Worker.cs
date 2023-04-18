@@ -8,35 +8,34 @@ namespace SteamTogether.Scraper;
 
 public class Worker : BackgroundService
 {
-    private readonly IScrapperService _scraper;
-    private readonly IDateTimeService _dateTimeService;
-    private readonly ScraperOptions _options;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<Worker> _logger;
 
     public Worker(
-        IScrapperService scrapper,
-        IDateTimeService dateTimeService,
-        IOptions<ScraperOptions> options,
+        IServiceProvider serviceProvider,
         ILogger<Worker> logger)
     {
-        _scraper = scrapper;
-        _dateTimeService = dateTimeService;
-        _options = options.Value;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (_options.RunOnStartup)
+        var services = _serviceProvider.CreateScope().ServiceProvider;
+        var scraper = services.GetRequiredService<IScrapperService>();
+        var dateTimeService = services.GetRequiredService<IDateTimeService>();
+        var options = services.GetRequiredService<IOptions<ScraperOptions>>().Value;
+        
+        if (options.RunOnStartup)
         {
-            await _scraper.RunSync();
+            await scraper.RunSync();
         }
 
-        _logger.LogInformation("Using schedule: {Schedule}", _options.Schedule);
-        var cron = CronExpression.Parse(_options.Schedule);
+        _logger.LogInformation("Using schedule: {Schedule}", options.Schedule);
+        var cron = CronExpression.Parse(options.Schedule);
         while (!stoppingToken.IsCancellationRequested)
         {
-            var utcNow = _dateTimeService.UtcNow;
+            var utcNow = dateTimeService.UtcNow;
             var utcNext = cron.GetNextOccurrence(utcNow);
 
             if (utcNext == null)
@@ -50,7 +49,7 @@ public class Worker : BackgroundService
 
             await Task.Delay(utcNext.Value - utcNow, stoppingToken);
 
-            await _scraper.RunSync();
+            await scraper.RunSync();
         }
     }
 }

@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamTogether.Core", "Steam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamTogether.Scraper", "SteamTogether.Scraper\SteamTogether.Scraper.csproj", "{DCB435A2-CBF9-49CD-AA03-6F5332266105}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamTogether.Scraper.IntegrationTests", "SteamTogether.Scraper.IntegrationTests\SteamTogether.Scraper.IntegrationTests.csproj", "{0B2922C4-2CF2-4370-8640-C18895EB0173}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{DCB435A2-CBF9-49CD-AA03-6F5332266105}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCB435A2-CBF9-49CD-AA03-6F5332266105}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCB435A2-CBF9-49CD-AA03-6F5332266105}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B2922C4-2CF2-4370-8640-C18895EB0173}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B2922C4-2CF2-4370-8640-C18895EB0173}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B2922C4-2CF2-4370-8640-C18895EB0173}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B2922C4-2CF2-4370-8640-C18895EB0173}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

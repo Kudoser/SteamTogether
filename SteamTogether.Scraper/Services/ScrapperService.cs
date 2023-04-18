@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Steam.Models.SteamStore;
 using SteamTogether.Core.Context;
@@ -12,22 +13,22 @@ namespace SteamTogether.Scraper.Services;
 public class ScrapperService : IScrapperService
 {
     private readonly ScraperOptions _options;
-    private readonly ApplicationDbContext _dbContext;
     private readonly ISteamService _steamService;
     private readonly IDateTimeService _dateTimeService;
     private readonly ILogger<ScrapperService> _logger;
+    private readonly ApplicationDbContext _dbContext;
 
     public ScrapperService(
         ISteamService steamService,
         IOptions<ScraperOptions> options,
-        IDbContextFactory<ApplicationDbContext> dbContextFactory,
+        ApplicationDbContext dbContext,
         IDateTimeService dateTimeService,
         ILogger<ScrapperService> logger
     )
     {
         _options = options.Value;
-        _dbContext = dbContextFactory.CreateDbContext();
         _steamService = steamService;
+        _dbContext = dbContext;
         _dateTimeService = dateTimeService;
         _logger = logger;
     }
@@ -35,7 +36,6 @@ public class ScrapperService : IScrapperService
     public async Task RunSync()
     {
         _logger.LogInformation("Starting sync...");
-
         var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
         var steamPlayers = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
