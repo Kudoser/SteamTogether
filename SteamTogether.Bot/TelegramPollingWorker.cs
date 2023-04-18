@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using SteamTogether.Bot.Services;
 using SteamTogether.Core.Context;
@@ -16,9 +17,18 @@ public sealed class TelegramPollingWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<TelegramPollingWorker>>();
+        logger.LogInformation(
+            "{Name} v{Version}",
+            Assembly.GetExecutingAssembly().GetName().Name,
+            Assembly
+                .GetExecutingAssembly()
+                .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
+                .First()
+                .InformationalVersion
+        );
 
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<TelegramPollingWorker>>();
         logger.LogInformation("Checking pending migrations");
 
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken);

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
+using System.Reflection;
 
 namespace SteamTogether.Scraper;
 
@@ -21,6 +22,16 @@ public class Worker : BackgroundService
         _serviceProvider = serviceProvider.CreateScope().ServiceProvider;
         _dateTimeService = dateTimeService;
         _logger = logger;
+
+        _logger.LogInformation(
+            "{Name} v{Version}",
+            Assembly.GetExecutingAssembly().GetName().Name,
+            Assembly
+                .GetExecutingAssembly()
+                .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
+                .First()
+                .InformationalVersion
+        );
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
