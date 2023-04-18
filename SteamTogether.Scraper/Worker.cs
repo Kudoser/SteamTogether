@@ -1,3 +1,4 @@
+using Cronos;
 using Microsoft.Extensions.Options;
 using NCrontab;
 using SteamTogether.Core.Services;
@@ -32,7 +33,7 @@ public class Worker : BackgroundService
         }
 
         _logger.LogInformation("Using schedule: {Schedule}", options.Schedule);
-        var cron = CrontabSchedule.Parse(options.Schedule, new CrontabSchedule.ParseOptions {IncludingSeconds = true});
+        var cron = CronExpression.Parse(options.Schedule, CronFormat.IncludeSeconds);
         while (!stoppingToken.IsCancellationRequested)
         {
             var utcNow = dateTimeService.UtcNow;
@@ -44,8 +45,8 @@ public class Worker : BackgroundService
                 break;
             }
 
-            var delay = utcNext - utcNow;
-            _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext, delay);
+            var delay = utcNext.Value - utcNow;
+            _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext.Value, delay);
 
             await Task.Delay(delay, stoppingToken);
 
