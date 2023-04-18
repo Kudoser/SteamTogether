@@ -4,21 +4,15 @@
   "tools": {
     "csharpier": {
       "version": "0.23.0",
-      "commands": [
-        "dotnet-csharpier"
-      ]
+      "commands": ["dotnet-csharpier"]
     },
     "dotnet-ef": {
       "version": "7.0.5",
-      "commands": [
-        "dotnet-ef"
-      ]
+      "commands": ["dotnet-ef"]
     },
     "dotnet-coverage": {
       "version": "17.7.0",
-      "commands": [
-        "dotnet-coverage"
-      ]
+      "commands": ["dotnet-coverage"]
     }
   }
 }
