@@ -7,6 +7,7 @@ on:
       - "**.cs"
       - "**.csproj"
       - "**.sln"
+      - ".config/dotnet-tools.json"
       - ".github/workflows/dotnet.yaml"
   pull_request:
     branches: ["*"]
@@ -14,6 +15,7 @@ on:
       - "**.cs"
       - "**.csproj"
       - "**.sln"
+      - ".config/dotnet-tools.json"
       - ".github/workflows/dotnet.yaml"
 
 jobs:
