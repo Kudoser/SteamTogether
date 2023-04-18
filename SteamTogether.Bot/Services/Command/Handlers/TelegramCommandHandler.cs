@@ -16,8 +16,8 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
     public TelegramCommandHandler(
         ITelegramBotClient telegramClient,
-        IDbContextFactory<ApplicationDbContext> _dbContextFactory,
         ISteamService steamService,
+        ApplicationDbContext dbContext,
         ILoggerFactory loggerFactory
     )
     {
@@ -25,7 +25,7 @@ public class TelegramCommandHandler : ITelegramCommandHandler
         _steamService = steamService;
         _loggerFactory = loggerFactory;
         
-        _dbContext = _dbContextFactory.CreateDbContext();
+        _dbContext = dbContext;
     }
 
     public ITelegramCommand Resolve(string name)

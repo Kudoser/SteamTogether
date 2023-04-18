@@ -44,8 +44,7 @@ public class ScraperTests
 
                 services
                     .AddScoped<IDateTimeService, DateTimeService>()
-                    .AddScoped<IScrapperService, ScrapperService>()
-                    .AddHostedService<Worker>();
+                    .AddScoped<IScrapperService, ScrapperService>();
 
                 services
                     .AddLogging(x => x.AddConsole())
