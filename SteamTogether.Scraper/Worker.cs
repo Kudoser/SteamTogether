@@ -47,7 +47,7 @@ public class Worker : BackgroundService
             var delay = utcNext.Value - utcNow;
             _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext.Value, delay);
 
-            await Task.Delay(utcNext.Value - utcNow, stoppingToken);
+            await Task.Delay(delay, stoppingToken);
 
             await scraper.RunSync();
         }

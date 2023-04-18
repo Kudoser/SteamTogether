@@ -1,21 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using SteamTogether.Core.Models;
-using SteamTogether.Core.Options;
 
 namespace SteamTogether.Core.Context;
 
 public class ApplicationDbContext : DbContext
 {
-    private readonly DatabaseOptions _options;
+    public ApplicationDbContext(DbContextOptions options) : base(options)
+    {
+    }
+
     public DbSet<SteamPlayer> SteamPlayers { get; set; } = default!;
     public DbSet<TelegramChat> TelegramChat { get; set; } = default!;
     public DbSet<SteamGame> SteamGames { get; set; } = default!;
-
-    public ApplicationDbContext(IOptions<DatabaseOptions> options)
-    {
-        _options = options.Value;
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,12 +45,5 @@ public class ApplicationDbContext : DbContext
                     je.HasKey("PlayerId", "ChatId");
                 }
             );
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(_options.ConnectionString);
-        
-        optionsBuilder.UseSqlite(_options.ConnectionString);
     }
 }

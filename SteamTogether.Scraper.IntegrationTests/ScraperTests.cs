@@ -19,39 +19,39 @@ namespace SteamTogether.Scraper.IntegrationTests;
 
 public class ScraperTests
 {
-    private readonly IServiceCollection _serviceProvider = new ServiceCollection();
+    private readonly HostBuilder _builder;
 
     public ScraperTests()
     {
-        var configBuilder = new ConfigurationBuilder();
-        var config = configBuilder
-            .AddEnvironmentVariables()
-            .AddJsonFile("appsettings.json", true, true)
-            .Build();
+        _builder = new HostBuilder();
+        _builder
+            .ConfigureAppConfiguration((_, config) =>
+            {
+                config
+                    .AddEnvironmentVariables()
+                    .SetBasePath(_.HostingEnvironment.ContentRootPath)
+                    .AddJsonFile("appsettings.json", true, true);
+            })
+            .ConfigureServices((builder, services) =>
+            {
+                services
+                    .AddOptions<ScraperOptions>()
+                    .Bind(builder.Configuration.GetSection(ScraperOptions.Scraper));
 
-        _serviceProvider
-            .AddOptions<ScraperOptions>().Bind(config.GetSection(ScraperOptions.Scraper));
+                services
+                    .AddOptions<DatabaseOptions>()
+                    .Bind(builder.Configuration.GetSection(DatabaseOptions.Database));
 
-        _serviceProvider
-            .AddOptions<DatabaseOptions>()
-            .Bind(config.GetSection(DatabaseOptions.Database));
+                services
+                    .AddScoped<IDateTimeService, DateTimeService>()
+                    .AddScoped<IScrapperService, ScrapperService>()
+                    .AddHostedService<Worker>();
 
-        _serviceProvider
-            .AddScoped<IDateTimeService, DateTimeService>()
-            .AddScoped<IScrapperService, ScrapperService>()
-            .AddSingleton<IHostedService, Worker>();
-
-        _serviceProvider
-            .AddLogging(x => x.AddConsole())
-            .AddDbContext<ApplicationDbContext>(
-                opt =>
-                {
-                    var connectionString =
-                        config.GetSection(DatabaseOptions.Database).GetValue<string>("ConnectionString");
-                    ArgumentException.ThrowIfNullOrEmpty(connectionString);
-
-                    opt.UseInMemoryDatabase(connectionString);
-                });
+                services
+                    .AddLogging(x => x.AddConsole())
+                    .AddDbContext<ApplicationDbContext>(
+                        opt => { opt.UseInMemoryDatabase("test.db"); });
+            });
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class ScraperTests
             {
                 Name = "Second game name",
                 Categories = new StoreCategoryModel[] {new() {Id = 1}},
-                SteamAppId = 1
+                SteamAppId = 2
             });
 
         mockedSteamService
@@ -109,39 +109,34 @@ public class ScraperTests
             {
                 Name = "Third game name",
                 Categories = new StoreCategoryModel[] {new() {Id = 1}},
-                SteamAppId = 1
+                SteamAppId = 3
             });
 
-
-        _serviceProvider.AddSingleton<ISteamService>(_ => mockedSteamService.Object);
-        var services = _serviceProvider.BuildServiceProvider();
-        var logger = LoggerFactory.Create(x => x.AddConsole()).CreateLogger<Worker>();
-
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-        if (pendingMigrations.Any())
+        _builder.ConfigureServices(services =>
         {
-            logger.LogInformation("Running pending migrations");
-            await dbContext.Database.MigrateAsync();
-        }
+            services.AddSingleton<ISteamService>(_ => mockedSteamService.Object);
+            services.AddSingleton<IHostedService, Worker>();
+        });
 
-        var worker = new Worker(services, logger);
+        var host = _builder.Build();
+        var dbContext = host.Services.GetRequiredService<ApplicationDbContext>();
+        
+        // fill up the database 
+        var newPLayer = new SteamPlayer {PlayerId = 1, Name = "John Doe"};
+        await dbContext.SteamPlayers.AddAsync(newPLayer);
+        await dbContext.SaveChangesAsync();
 
-        await dbContext.SteamPlayers.AddAsync(
-            new SteamPlayer
-            {
-                PlayerId = 1,
-                Name = "John Doe"
-            });
-        // @todo
-        /*await dbContext.SaveChangesAsync();
-        await worker.StartAsync(new CancellationToken());
+        var scraper = host.Services.GetRequiredService<IScrapperService>();
+        await scraper.RunSync();
 
-        var player = dbContext.SteamPlayers.FirstOrDefault(player => player.PlayerId == 1);
+        var player = dbContext.SteamPlayers
+            .Include(player => player.Games)
+            .FirstOrDefault(player => player.PlayerId == 1);
+        
         Assert.NotNull(player);
         Assert.Equal(3, player.Games.Count);
-        Assert.Equal("First game", player.Games.FirstOrDefault(game => game.SteamAppId == 1)?.Name);
-        Assert.Equal("First game", player.Games.FirstOrDefault(game => game.SteamAppId == 2)?.Name);
-        Assert.Equal("First game", player.Games.FirstOrDefault(game => game.SteamAppId == 3)?.Name);*/
+        Assert.Equal("First game name", player.Games.FirstOrDefault(game => game.SteamAppId == 1)?.Name);
+        Assert.Equal("Second game name", player.Games.FirstOrDefault(game => game.SteamAppId == 2)?.Name);
+        Assert.Equal("Third game name", player.Games.FirstOrDefault(game => game.SteamAppId == 3)?.Name);
     }
 }
