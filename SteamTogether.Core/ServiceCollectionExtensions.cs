@@ -8,16 +8,15 @@ namespace SteamTogether.Core;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection RegisterDataServices(this IServiceCollection services)
+    public static IServiceCollection RegisterDatabaseServices(this IServiceCollection services)
     {
         services.AddDbContext<ApplicationDbContext>(
             (provider, dbOptions) =>
-            {
-                var opts = provider.GetRequiredService<IOptions<DatabaseOptions>>();
-                dbOptions.UseSqlite(opts.Value.ConnectionString);
-            }
-        );
-
+        {
+            var opts = provider.GetRequiredService<IOptions<DatabaseOptions>>();
+            dbOptions.UseSqlite(opts.Value.ConnectionString);
+        });
+        
         return services;
     }
 }

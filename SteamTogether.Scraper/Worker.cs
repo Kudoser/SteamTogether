@@ -1,5 +1,6 @@
 using Cronos;
 using Microsoft.Extensions.Options;
+using NCrontab;
 using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
@@ -11,16 +12,12 @@ public class Worker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<Worker> _logger;
-    private readonly IDateTimeService _dateTimeService;
 
     public Worker(
-        IDateTimeService dateTimeService,
-        ILogger<Worker> logger,
-        IServiceProvider serviceProvider
-    )
+        IServiceProvider serviceProvider,
+        ILogger<Worker> logger)
     {
-        _serviceProvider = serviceProvider.CreateScope().ServiceProvider;
-        _dateTimeService = dateTimeService;
+        _serviceProvider = serviceProvider;
         _logger = logger;
 
         _logger.LogInformation(
@@ -36,20 +33,21 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var options = _serviceProvider.GetRequiredService<IOptions<ScraperOptions>>();
-        var opts = options.Value;
-
-        var scraper = _serviceProvider.GetRequiredService<IScrapperService>();
-        if (opts.RunOnStartup)
+        var services = _serviceProvider.CreateScope().ServiceProvider;
+        var scraper = services.GetRequiredService<IScrapperService>();
+        var dateTimeService = services.GetRequiredService<IDateTimeService>();
+        var options = services.GetRequiredService<IOptions<ScraperOptions>>().Value;
+        
+        if (options.RunOnStartup)
         {
             await scraper.RunSync();
         }
 
-        _logger.LogInformation("Using schedule: {Schedule}", opts.Schedule);
-        var cron = CronExpression.Parse(opts.Schedule);
+        _logger.LogInformation("Using schedule: {Schedule}", options.Schedule);
+        var cron = CronExpression.Parse(options.Schedule, CronFormat.IncludeSeconds);
         while (!stoppingToken.IsCancellationRequested)
         {
-            var utcNow = _dateTimeService.UtcNow;
+            var utcNow = dateTimeService.UtcNow;
             var utcNext = cron.GetNextOccurrence(utcNow);
 
             if (utcNext == null)
@@ -61,7 +59,7 @@ public class Worker : BackgroundService
             var delay = utcNext.Value - utcNow;
             _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext.Value, delay);
 
-            await Task.Delay(utcNext.Value - utcNow, stoppingToken);
+            await Task.Delay(delay, stoppingToken);
 
             await scraper.RunSync();
         }
