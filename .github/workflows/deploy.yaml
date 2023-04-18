@@ -32,22 +32,26 @@ jobs:
           echo "${{ secrets.DOCKER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+      - name: Generate version number
+        id: version
+        run: echo "::set-output name=version::$(scripts/version.sh)"
+
       - name: Docker Compose build
         run: docker compose build
         env:
-          DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
-          GIT_COMMIT: ${{ github.sha }}
           BOT_HEALTHCHECK__PORT: 10090
+          DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Docker Compose up
         run: docker compose up -d
         env:
+          BOT_HEALTHCHECK__PORT: 10090
           BOT_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
           BOT_TELEGRAM__TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
-          GIT_COMMIT: ${{ github.sha }}
           SCRAPER_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
-          BOT_HEALTHCHECK__PORT: 10090
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Notify Telegram
         uses: appleboy/telegram-action@master
