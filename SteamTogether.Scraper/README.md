@@ -17,7 +17,7 @@ Scrape games from steam
 
     ```shell
     > .\SteamTogether.Bot.exe
-          --Scraper:Schedule="* */5 * * *"
+          --Scraper:Schedule="0 0 */5 * * *"
           --Steam:ApiKey="YOUR_API_KEY"
           --Database:ConnectionString="Data Source=together.db"
     ```
@@ -26,7 +26,7 @@ Scrape games from steam
 
     ```shell
     > set SCRAPER_Steam__ApiKey="YOUR_API_KEY"
-    > set SCRAPER_Scraper__Schedule="0 */5 * * *"
+    > set SCRAPER_Scraper__Schedule="0 0 */5 * * *"
     > set SCRAPER_Database__ConnectionString="Data Source=together.db"
     > .\SteamTogether.Bot.exe
     ```
@@ -34,7 +34,7 @@ Scrape games from steam
 ### Arguments
 
 - `Schedule` (required) - sets a schedule on which to run scraping.
-  Uses crontab format, for example, `0 */5 * * *` will run scrapper every 5 hours.
+  Uses ncrontab format with seconds, for example, `0 0 */5 * * *` will run scrapper every 5 hours.
   See [implementation](https://github.com/atifaziz/NCrontab#ncrontab-crontab-for-net) for more details.
 - `RunOnStartup` - if set to `true`, runs scraping right after the host is started, in addition to the schedule, default = false.
 - `PlayersSyncPeriodSeconds` - a period in seconds to sync players, default = 18000 (5 hours).

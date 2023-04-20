@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Steam.Models.SteamStore;
 using SteamTogether.Core.Context;
@@ -6,18 +7,16 @@ using SteamTogether.Core.Models;
 using SteamTogether.Core.Services;
 using SteamTogether.Core.Services.Steam;
 using SteamTogether.Scraper.Options;
-using SteamWebAPI2.Interfaces;
 
 namespace SteamTogether.Scraper.Services;
 
 public class ScrapperService : IScrapperService
 {
     private readonly ScraperOptions _options;
-    private readonly ApplicationDbContext _dbContext;
+    private readonly ISteamService _steamService;
     private readonly IDateTimeService _dateTimeService;
     private readonly ILogger<ScrapperService> _logger;
-    private readonly PlayerService _steamUserService;
-    private readonly SteamStore _steamStoreService;
+    private readonly ApplicationDbContext _dbContext;
 
     public ScrapperService(
         ISteamService steamService,
@@ -28,21 +27,16 @@ public class ScrapperService : IScrapperService
     )
     {
         _options = options.Value;
+        _steamService = steamService;
         _dbContext = dbContext;
         _dateTimeService = dateTimeService;
         _logger = logger;
-
-        _steamUserService = steamService.GetSteamUserWebInterface<PlayerService>();
-        _steamStoreService = steamService.CreateSteamStoreInterface();
     }
 
     public async Task RunSync()
     {
         _logger.LogInformation("Starting sync...");
-
-        var syncDate = _dateTimeService
-            .GetCurrentTime()
-            .AddSeconds(-_options.PlayerSyncPeriodSeconds);
+        var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
         var steamPlayers = _dbContext.SteamPlayers
             .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
             .Include(player => player.Games)
@@ -59,7 +53,7 @@ public class ScrapperService : IScrapperService
         foreach (var player in steamPlayers)
         {
             _logger.LogInformation("Processing player Name={Name}", player.Name);
-            var ownedGamesRequest = await _steamUserService.GetOwnedGamesAsync(player.PlayerId);
+            var ownedGamesRequest = await _steamService.GetOwnedGamesAsync(player.PlayerId);
 
             var ownedGameIds = ownedGamesRequest.Data.OwnedGames.Select(o => o.AppId).ToArray();
 
@@ -67,16 +61,16 @@ public class ScrapperService : IScrapperService
             {
                 _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
 
-                var lastGamesSync = _dateTimeService
-                    .GetCurrentTime()
-                    .AddMinutes(-_options.GamesSyncPeriodMinutes);
+                var lastGamesSync = _dateTimeService.UtcNow.AddMinutes(
+                    -_options.GamesSyncPeriodMinutes
+                );
                 var game = allGames.FirstOrDefault(g => g.GameId == ownedGameId);
                 if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
                 {
                     StoreAppDetailsDataModel storeApp;
                     try
                     {
-                        storeApp = await _steamStoreService.GetStoreAppDetailsAsync(ownedGameId);
+                        storeApp = await _steamService.GetAppDetailsAsync(ownedGameId);
                     }
                     catch (Exception)
                     {
@@ -129,7 +123,7 @@ public class ScrapperService : IScrapperService
                     );
                 }
 
-                game.LastSyncDateTime = _dateTimeService.GetCurrentTime();
+                game.LastSyncDateTime = _dateTimeService.UtcNow;
 
                 var connected = player.Games.Select(g => g.GameId).Contains(game.GameId);
 
@@ -144,7 +138,7 @@ public class ScrapperService : IScrapperService
                 }
             }
 
-            player.LastSyncDateTime = _dateTimeService.GetCurrentTime();
+            player.LastSyncDateTime = _dateTimeService.UtcNow;
         }
 
         var count = await _dbContext.SaveChangesAsync();

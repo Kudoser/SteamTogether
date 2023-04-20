@@ -1,10 +1,13 @@
 services:
   bot:
     build:
+      args:
+        - VERSION
       context: .
       dockerfile: Dockerfile
       target: bot
-    image: kudoser/steam-together-bot:${GIT_COMMIT:-latest}
+    image: kudoser/steam-together-bot:${VERSION:-latest}
+    restart: unless-stopped
     healthcheck:
       test: curl -fsSI http://localhost:${BOT_HEALTHCHECK__PORT:?} || exit 1
       interval: 10s
@@ -21,10 +24,13 @@ services:
 
   scraper:
     build:
+      args:
+        - VERSION
       context: .
       dockerfile: Dockerfile
       target: scraper
-    image: kudoser/steam-together-scraper:${GIT_COMMIT:-latest}
+    image: kudoser/steam-together-scraper:${VERSION:-latest}
+    restart: unless-stopped
     depends_on:
       - bot
     environment:

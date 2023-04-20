@@ -1,7 +1,10 @@
+using Cronos;
 using Microsoft.Extensions.Options;
+using NCrontab;
 using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
+using System.Reflection;
 
 namespace SteamTogether.Scraper;
 
@@ -10,50 +13,53 @@ public class Worker : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<Worker> _logger;
 
-    public Worker(IServiceProvider serviceProvider, ILogger<Worker> logger)
+    public Worker(
+        IServiceProvider serviceProvider,
+        ILogger<Worker> logger)
     {
-        _serviceProvider = serviceProvider.CreateScope().ServiceProvider;
+        _serviceProvider = serviceProvider;
         _logger = logger;
+
+        _logger.LogInformation(
+            "{Name} v{Version}",
+            Assembly.GetExecutingAssembly().GetName().Name,
+            Assembly
+                .GetExecutingAssembly()
+                .GetCustomAttributes<AssemblyInformationalVersionAttribute>()
+                .First()
+                .InformationalVersion
+        );
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var options = _serviceProvider.GetRequiredService<IOptions<ScraperOptions>>();
-        var opts = options.Value;
-
-        var scraper = _serviceProvider.GetRequiredService<IScrapperService>();
-        if (opts.RunOnStartup)
+        var services = _serviceProvider.CreateScope().ServiceProvider;
+        var scraper = services.GetRequiredService<IScrapperService>();
+        var dateTimeService = services.GetRequiredService<IDateTimeService>();
+        var options = services.GetRequiredService<IOptions<ScraperOptions>>().Value;
+        
+        if (options.RunOnStartup)
         {
             await scraper.RunSync();
         }
 
-        var schedule = NCrontab.CrontabSchedule.Parse(opts.Schedule);
-        _logger.LogInformation("Worker running at: {Schedule}", opts.Schedule);
+        _logger.LogInformation("Using schedule: {Schedule}", options.Schedule);
+        var cron = CronExpression.Parse(options.Schedule, CronFormat.IncludeSeconds);
         while (!stoppingToken.IsCancellationRequested)
         {
-            var dateTimeService = _serviceProvider.GetRequiredService<IDateTimeService>();
-            var now = dateTimeService.GetCurrentTime();
+            var utcNow = dateTimeService.UtcNow;
+            var utcNext = cron.GetNextOccurrence(utcNow);
 
-            var nextExecutionTime = schedule.GetNextOccurrence(dateTimeService.GetCurrentTime());
+            if (utcNext == null)
+            {
+                _logger.LogWarning("No next run found, stopping worker");
+                break;
+            }
 
-            var period = nextExecutionTime - now;
-            _logger.LogInformation(
-                "Periodic timer debug: {Next} - {Now} = {Period}",
-                nextExecutionTime,
-                now,
-                period
-            );
+            var delay = utcNext.Value - utcNow;
+            _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext.Value, delay);
 
-            _logger.LogInformation(
-                "Periodic timer debug: {Next} - {Now} = {Period}",
-                nextExecutionTime.Ticks,
-                now.Ticks,
-                period.Ticks
-            );
-
-            using var timer = new PeriodicTimer(nextExecutionTime - now);
-
-            await timer.WaitForNextTickAsync(stoppingToken);
+            await Task.Delay(delay, stoppingToken);
 
             await scraper.RunSync();
         }

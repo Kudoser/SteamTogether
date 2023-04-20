@@ -91,7 +91,7 @@ var host = Host.CreateDefaultBuilder()
                 .Bind(builder.Configuration.GetSection(HealthCheckOptions.HealthCheck))
                 .ValidateDataAnnotations();
 
-            services.RegisterDataServices();
+            services.RegisterDatabaseServices();
 
             services.AddHttpClient();
             services

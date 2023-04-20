@@ -20,6 +20,7 @@ COPY --link SteamTogether.Bot/*.csproj SteamTogether.Bot/
 COPY --link SteamTogether.Bot.UnitTests/*.csproj SteamTogether.Bot.UnitTests/
 COPY --link SteamTogether.Core/*.csproj SteamTogether.Core/
 COPY --link SteamTogether.Scraper/*.csproj SteamTogether.Scraper/
+COPY --link SteamTogether.Scraper.UnitTests/*.csproj SteamTogether.Scraper.UnitTests/
 
 RUN dotnet restore --no-cache
 
@@ -28,13 +29,16 @@ COPY --link SteamTogether.Bot SteamTogether.Bot
 COPY --link SteamTogether.Bot.UnitTests SteamTogether.Bot.UnitTests
 COPY --link SteamTogether.Core SteamTogether.Core
 COPY --link SteamTogether.Scraper SteamTogether.Scraper
+COPY --link SteamTogether.Scraper.UnitTests SteamTogether.Scraper.UnitTests
 
 
 FROM restore AS build-bot
+ARG VERSION=¯\_(ツ)_/¯
 RUN dotnet publish SteamTogether.Bot/SteamTogether.Bot.csproj \
     --configuration Release \
     --output /publish \
-    --no-restore
+    --no-restore \
+    -p:Version=$VERSION
 
 
 FROM runtime AS bot
@@ -44,10 +48,12 @@ ENTRYPOINT ["/app/SteamTogether.Bot"]
 
 
 FROM restore AS build-scraper
+ARG VERSION=¯\_(ツ)_/¯
 RUN dotnet publish SteamTogether.Scraper/SteamTogether.Scraper.csproj \
     --configuration Release \
     --output /publish \
-    --no-restore
+    --no-restore \
+    -p:Version=$VERSION
 
 
 FROM runtime as scraper

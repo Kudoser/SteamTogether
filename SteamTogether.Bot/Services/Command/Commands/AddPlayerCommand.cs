@@ -49,8 +49,7 @@ public class AddPlayerListCommand : ITelegramCommand
         var player = await _dbContext.SteamPlayers.FindAsync(playerId);
         if (player == null)
         {
-            var steamUserService = _steamService.GetSteamUserWebInterface<SteamUser>();
-            var steamWebResponse = await steamUserService.GetPlayerSummaryAsync(playerId);
+            var steamWebResponse = await _steamService.GetPlayerSummaryAsync(playerId);
             if (steamWebResponse == null)
             {
                 await SendMessage(chatId, $"player with ID={playerId} doesn't exist");
