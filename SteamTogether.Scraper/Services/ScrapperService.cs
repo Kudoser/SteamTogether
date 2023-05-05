@@ -16,6 +16,9 @@ public class ScrapperService : IScrapperService
     private readonly IDateTimeService _dateTimeService;
     private readonly ILogger<ScrapperService> _logger;
     private readonly ApplicationDbContext _dbContext;
+    
+    private List<SteamGame> _allGames = new();
+    private List<SteamGameCategory> _allGameCategories = new();
 
     public ScrapperService(
         ISteamService steamService,
@@ -47,10 +50,16 @@ public class ScrapperService : IScrapperService
             _logger.LogInformation("Nothing to process");
             return;
         }
+        _allGames = _dbContext.SteamGames
+            .Include(g => g.Categories)
+            .ToList();
 
+        _allGameCategories = _dbContext.SteamGamesCategories
+            .ToList();
+        
         foreach (var player in steamPlayers)
         {
-            await ProcessPlayer(player);
+            await SyncPlayerAsync(player);
         }
 
         var count = await _dbContext.SaveChangesAsync();
@@ -58,24 +67,27 @@ public class ScrapperService : IScrapperService
         _logger.LogInformation("Done");
     }
 
-    private async Task ProcessPlayer(SteamPlayer player)
+    private async Task SyncPlayerAsync(SteamPlayer player)
     {
         _logger.LogInformation("Processing player Name={Name}", player.Name);
         var ownedGamesRequest = await _steamService.GetOwnedGamesAsync(player.PlayerId);
-        var ownedGameIds = ownedGamesRequest.Data.OwnedGames.Select(o => o.AppId).ToArray();
+        var ownedGameIds = ownedGamesRequest.Data.OwnedGames
+            .Select(o => o.AppId)
+            .ToArray();
+        
         foreach (var ownedGameId in ownedGameIds)
         {
-            await ProcessGame(player, ownedGameId);
+            await SyncGameAsync(player, ownedGameId);
         }
 
         player.LastSyncDateTime = _dateTimeService.UtcNow;
     }
 
-    private async Task ProcessGame(SteamPlayer player, uint ownedGameId)
+    private async Task SyncGameAsync(SteamPlayer player, uint ownedGameId)
     {
         _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
         
-        var game = await InsertOrUpdateGame(ownedGameId);
+        var game = await InsertOrUpdateGameAsync(ownedGameId);
         if (game == null)
         {
             return;
@@ -94,9 +106,10 @@ public class ScrapperService : IScrapperService
     }
 
 
-    private async Task<SteamGame?> InsertOrUpdateGame(uint gameId)
+    private async Task<SteamGame?> InsertOrUpdateGameAsync(uint gameId)
     {
-        var game = _dbContext.SteamGames.FirstOrDefault(g => g.GameId == gameId);
+        var game = _allGames.FirstOrDefault(g => g.GameId == gameId);
+        
         var lastGamesSync = _dateTimeService.UtcNow.AddMinutes(-_options.GamesSyncPeriodMinutes);
         if (game?.LastSyncDateTime == null || game.LastSyncDateTime < lastGamesSync)
         {
@@ -131,6 +144,7 @@ public class ScrapperService : IScrapperService
                     gameId,
                     game.Name
                 );
+                _allGames.Add(game);
                 _dbContext.SteamGames.Add(game);
             }
             else
@@ -144,12 +158,43 @@ public class ScrapperService : IScrapperService
                     gameId,
                     game.Name
                 );
-                _dbContext.SteamGames.Update(game);
             }
+
+            SyncCategories(game, storeApp);
         }
 
         game.LastSyncDateTime = _dateTimeService.UtcNow;
         
         return game;
+    }
+
+    private void SyncCategories(SteamGame game, StoreAppDetailsDataModel storeApp)
+    {
+        foreach (var storeCategory in storeApp.Categories)
+        {
+            var gameCategory = _allGameCategories.FirstOrDefault(c => c.CategoryId == storeCategory.Id);
+            if (gameCategory == null)
+            {
+                gameCategory = new SteamGameCategory
+                {
+                    CategoryId = storeCategory.Id,
+                    Description = storeCategory.Description
+                };
+
+                _logger.LogInformation("New category: {NewCategory}", storeCategory.Description);
+                _allGameCategories.Add(gameCategory);
+                _dbContext.SteamGamesCategories.Add(gameCategory);
+            }
+            else
+            {
+                gameCategory.Description = storeCategory.Description;
+            }
+            
+            var connected = game.Categories.Select(c => c.CategoryId).Contains(gameCategory.CategoryId);
+            if (!connected)
+            {
+                game.Categories.Add(gameCategory);
+            }
+        }
     }
 }

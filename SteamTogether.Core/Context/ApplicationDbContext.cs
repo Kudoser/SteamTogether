@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<SteamPlayer> SteamPlayers { get; set; } = default!;
     public DbSet<TelegramChat> TelegramChat { get; set; } = default!;
     public DbSet<SteamGame> SteamGames { get; set; } = default!;
+    public DbSet<SteamGameCategory> SteamGamesCategories { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +28,20 @@ public class ApplicationDbContext : DbContext
                 je =>
                 {
                     je.HasKey("PlayerId", "GameId");
+                }
+            );
+        
+        modelBuilder
+            .Entity<SteamGame>()
+            .HasMany<SteamGameCategory>(g => g.Categories)
+            .WithMany(c => c.Games)
+            .UsingEntity<Dictionary<string, object>>(
+                "SteamGameSteamCategory",
+                r => r.HasOne<SteamGameCategory>().WithMany().HasForeignKey("CategoryId"),
+                l => l.HasOne<SteamGame>().WithMany().HasForeignKey("GameId"),
+                je =>
+                {
+                    je.HasKey("GameId", "CategoryId");
                 }
             );
 
