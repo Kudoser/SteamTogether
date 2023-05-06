@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Models.Requests;
@@ -48,10 +49,11 @@ public class HttpCommandListener : IHttpCommandListener
         using var readStream = new StreamReader(receiveStream, Encoding.UTF8);
         var content = await readStream.ReadToEndAsync();
 
-        ScraperStatusCommandRequest? commandRequest;
+        ScraperCommandRequest? commandRequest;
         try
         {
-            commandRequest = JsonSerializer.Deserialize<ScraperStatusCommandRequest>(content);
+            var options = new JsonSerializerOptions {Converters = {new JsonStringEnumConverter()}};
+            commandRequest = JsonSerializer.Deserialize<ScraperCommandRequest>(content, options);
             ArgumentNullException.ThrowIfNull(commandRequest);
         }
         catch (Exception)
@@ -70,6 +72,37 @@ public class HttpCommandListener : IHttpCommandListener
             _logger.LogInformation("Status command requested, current status: {Status}", currentStatus);
             var scraperResponse = new ScraperStatusResponse { Status = currentStatus };
             await RespondWithStatus(context.Response, scraperResponse, HttpStatusCode.OK);
+            return;
+        }
+
+        if (commandRequest.Command == CommandRequest.Sync)
+        {
+            if (scraper.SyncStatus == ScraperSyncStatus.InProgress)
+            {
+                await RespondWithStatus(context.Response, new { Error = "Busy" }, HttpStatusCode.ServiceUnavailable);
+                return;
+            }
+            
+            ulong[] playerIds = { }; 
+            if (commandRequest.Arguments.Any())
+            {
+                try
+                {
+                    playerIds = commandRequest.Arguments
+                        .Select(ulong.Parse)
+                        .ToArray();
+                }
+                catch (Exception)
+                { 
+                    await RespondWithStatus(context.Response, new { Error = "Wrong arguments" }, HttpStatusCode.BadRequest);
+                    return;
+                }
+            }
+            
+            _logger.LogInformation("Sync has requested by http command");
+            scraper.RunSync(playerIds);
+            var scraperResponse = new { Result = "Started" };
+            await RespondWithStatus(context.Response, scraperResponse, HttpStatusCode.Accepted);
             return;
         }
         

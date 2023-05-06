@@ -40,3 +40,44 @@ Scrape games from steam
 - `PlayersSyncPeriodSeconds` - a period in seconds to sync players, default = 18000 (5 hours).
 - `GamesSyncPeriodMinutes` - a period in minutes to sync games, default = 10080 (7 days).
 - `PlayersPerRun` - how many players to process per one run, default = 10.
+- `HttpCommandPort` - http listener port, default = 10091.
+
+## Http listener commands
+
+### Status
+
+* Command - enum [Status = 0, Sync = 1]
+
+#### Request: 
+```http request
+GET http://localhost:8080 {"Command": 0}
+```
+
+#### Response: 200 OK 
+```json
+{
+    "Status": 0
+}
+```
+
+### Sync
+
+#### Request:
+```http request
+GET http://localhost:8080 {"Command": 1, "Arguments": ["123456789"]}
+```
+* Result - enum [Success|Busy]
+
+#### Response: 200 OK
+```json
+{
+    "Result": "Success"
+}
+```
+
+#### Response: 503 ServiceUnavailable
+```json
+{
+    "Result": "Busy"
+}
+```

@@ -38,22 +38,37 @@ public class ScraperService : IScraperService
 
     public async Task RunSync()
     {
+        await RunSync(Array.Empty<ulong>());
+    }
+
+    public async Task RunSync(ulong[] playerIds)
+    {
         if (SyncStatus == ScraperSyncStatus.InProgress)
         {
             _logger.LogInformation("Sync in process...");
             return;
         }
-
+        
         SyncStatus = ScraperSyncStatus.InProgress;
         try
         {
-            _logger.LogInformation("Starting sync...");
-            var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
-            var steamPlayers = _dbContext.SteamPlayers
-                .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
-                .Include(player => player.Games)
-                .Take(_options.PlayersPerRun)
-                .ToArray();
+            SteamPlayer[] steamPlayers;
+            if (playerIds.Any())
+            {
+                steamPlayers = _dbContext.SteamPlayers
+                    .Where(p => playerIds.Contains(p.PlayerId))
+                    .Include(player => player.Games)
+                    .ToArray();
+            }
+            else
+            {
+                var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
+                steamPlayers = _dbContext.SteamPlayers
+                    .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
+                    .Include(player => player.Games)
+                    .Take(_options.PlayersPerRun)
+                    .ToArray();
+            }
 
             if (!steamPlayers.Any())
             {
@@ -69,6 +84,7 @@ public class ScraperService : IScraperService
             _allGameCategories = _dbContext.SteamGamesCategories
                 .ToList();
 
+            _logger.LogInformation("Starting sync for {Count} players...", steamPlayers.Length);
             foreach (var player in steamPlayers)
             {
                 await SyncPlayerAsync(player);
