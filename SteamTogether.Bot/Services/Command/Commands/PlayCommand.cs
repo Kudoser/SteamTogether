@@ -44,7 +44,7 @@ public class PlayCommand : ITelegramCommand
             : new[] {DefaultGameCategory};
 
         var categories = _dbContext.SteamGamesCategories
-            .Where(c => categoryNames.Contains(c.Description))
+            .Where(c => categoryNames.Select(_ => _.ToLower()).Contains(c.Description.ToLower()))
             .ToArray();
 
         var categoryIds = categories
