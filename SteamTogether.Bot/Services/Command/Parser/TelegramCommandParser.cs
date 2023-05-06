@@ -1,4 +1,6 @@
-﻿namespace SteamTogether.Bot.Services.Command.Parser;
+﻿using Microsoft.CodeAnalysis;
+
+namespace SteamTogether.Bot.Services.Command.Parser;
 
 public class TelegramCommandParser : ITelegramCommandParser
 {
@@ -11,8 +13,14 @@ public class TelegramCommandParser : ITelegramCommandParser
         }
 
         var parts = input.Split(' ');
-        result.CommandName = parts[0][1..];
-        result.Arguments = parts.Length > 1 ? parts[1].Split(',') : Array.Empty<string>();
+        var commandNameWithBackslash = parts[0];
+        var commandArgumentsAsString = input.Substring(commandNameWithBackslash.Length);
+        
+        result.CommandName = commandNameWithBackslash[1..];
+        result.Arguments = parts.Length > 1
+            ? CommandLineParser.SplitCommandLineIntoArguments(commandArgumentsAsString, true).ToArray()
+            : new string[] { };
+        
         result.Parsed = true;
 
         return result;

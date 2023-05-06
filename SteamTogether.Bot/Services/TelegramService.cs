@@ -66,7 +66,13 @@ public class TelegramService : ITelegramService
             message.Text,
             message.Chat.Id
         );
-
+        
+        var botCommand = message.Entities?.FirstOrDefault(e => e.Type == MessageEntityType.BotCommand);
+        if (botCommand == null)
+        {
+            return;
+        }
+        
         try
         {
             var parsedResult = _telegramCommandParser.Parse(message.Text);
