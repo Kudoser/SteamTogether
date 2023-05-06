@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SteamTogether.Core.Context;
-using SteamTogether.Core.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -33,13 +32,35 @@ public class PlayCommand : ITelegramCommand
             .Where(chat => chat.ChatId == chatId)
             .Include(chat => chat.Players)
             .ThenInclude(player => player.Games)
+            .ThenInclude(game => game.Categories)
             .FirstOrDefault();
 
         ArgumentNullException.ThrowIfNull(chat);
 
+        // @todo reconsider args and parameters
+        // @todo default category
+        uint categoryId = 9;
+        var unparsedCategoryId = args.FirstOrDefault();
+        if (unparsedCategoryId != null)
+        {
+            if (!uint.TryParse(unparsedCategoryId, out categoryId))
+            {
+                await SendMessage(chatId, $"Parse error");
+                return;
+            }
+        }
+        
+        var category = _dbContext.SteamGamesCategories.FirstOrDefault(c => c.CategoryId == categoryId);
+        if (category == null)
+        {
+            await SendMessage(chatId, $"Category {categoryId} doesn't exist");
+            return;
+        }
+        
+
         var games = chat.Players
             .SelectMany(
-                player => player.Games.Where(game => game.Multiplayer),
+                player => player.Games.Where(game => game.Categories.Any(c => c.CategoryId == category.CategoryId)),
                 (player, game) =>
                     new
                     {
@@ -67,11 +88,12 @@ public class PlayCommand : ITelegramCommand
             return;
         }
 
-        var messageLines = games.Select(
+        var messageLines = new List<string> {$"Category: {category.Description}({categoryId})"};
+        var lines = games.Select(
             (g, i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})"
         );
-        var message = string.Join("\n", messageLines);
-        await SendMessage(chatId, message);
+        messageLines.AddRange(lines);
+        await SendMessage(chatId, string.Join("\n", messageLines));
     }
 
     private async Task SendMessage(long chatId, string message)

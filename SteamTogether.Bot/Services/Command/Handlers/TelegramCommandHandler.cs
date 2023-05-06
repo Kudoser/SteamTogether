@@ -53,6 +53,12 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             return new HelpCommand(_telegramClient);
         }
 
+        if (name == CategoriesCommand.Name)
+        {
+            var logger = _loggerFactory.CreateLogger<CategoriesCommand>();
+            return new CategoriesCommand(_telegramClient, _dbContext, logger);
+        }
+
         throw new UnknownCommandException($"Unknown command name={name}]");
     }
 }
