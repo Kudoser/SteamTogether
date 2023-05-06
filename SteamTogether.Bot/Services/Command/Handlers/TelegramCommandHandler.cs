@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SteamTogether.Bot.Services.Command.Commands;
+﻿using SteamTogether.Bot.Services.Command.Commands;
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Exceptions;
 using SteamTogether.Core.Services.Steam;
@@ -12,19 +11,21 @@ public class TelegramCommandHandler : ITelegramCommandHandler
     private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
     private readonly ISteamService _steamService;
+    private readonly IScraperCommandClient _scraperCommandClient;
     private readonly ILoggerFactory _loggerFactory;
 
     public TelegramCommandHandler(
         ITelegramBotClient telegramClient,
         ISteamService steamService,
+        IScraperCommandClient scraperCommandClient,
         ApplicationDbContext dbContext,
-        ILoggerFactory loggerFactory
-    )
+        ILoggerFactory loggerFactory)
     {
         _telegramClient = telegramClient;
         _steamService = steamService;
         _loggerFactory = loggerFactory;
-        
+        _scraperCommandClient = scraperCommandClient;
+
         _dbContext = dbContext;
     }
 
@@ -57,6 +58,12 @@ public class TelegramCommandHandler : ITelegramCommandHandler
         {
             var logger = _loggerFactory.CreateLogger<CategoriesCommand>();
             return new CategoriesCommand(_telegramClient, _dbContext, logger);
+        }
+
+        if (name == SyncCommand.Name)
+        {
+            var logger = _loggerFactory.CreateLogger<SyncCommand>();
+            return new SyncCommand(_telegramClient, _scraperCommandClient, logger);
         }
 
         throw new UnknownCommandException($"Unknown command name={name}]");

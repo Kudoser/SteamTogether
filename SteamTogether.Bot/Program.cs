@@ -44,6 +44,10 @@ var host = Host.CreateDefaultBuilder()
                 .AddOptions<HealthCheckOptions>()
                 .Bind(builder.Configuration.GetSection(HealthCheckOptions.HealthCheck))
                 .ValidateDataAnnotations();
+            services
+                .AddOptions<ScraperCommandOptions>()
+                .Bind(builder.Configuration.GetSection(ScraperCommandOptions.ScraperCommand))
+                .ValidateDataAnnotations();
 
             services.RegisterDatabaseServices();
 
@@ -69,6 +73,8 @@ var host = Host.CreateDefaultBuilder()
             services.AddScoped<ITelegramService, TelegramService>();
             services.AddScoped<ISteamService, SteamService>();
             services.AddTransient<IHealthCheckService, HealthCheckService>();
+            
+            services.AddScoped<IScraperCommandClient, ScraperCommandHttpClient>();
 
             services.AddHostedService<TelegramPollingWorker>();
             services.AddHostedService<HealthCheckWorker>();
