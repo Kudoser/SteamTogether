@@ -36,12 +36,15 @@ var host = Host.CreateDefaultBuilder(args)
             services.Configure<SteamOptions>(builder.Configuration.GetSection(SteamOptions.Steam));
 
             services.AddHttpClient();
-            services.AddScoped<IDateTimeService, DateTimeService>();
-            services.AddScoped<IScrapperService, ScrapperService>();
-            services.AddScoped<ISteamService, SteamService>();
+
+            services
+                .AddScoped<IDateTimeService, DateTimeService>()
+                .AddScoped<IScraperService, ScraperService>()
+                .AddScoped<ISteamService, SteamService>()
+                .AddScoped<IHttpCommandListener, HttpCommandListener>();
             
             services.RegisterDatabaseServices();
-            services.AddHostedService<Worker>();
+            services.AddHostedService<ScraperWorker>();
         }
     )
     .Build();

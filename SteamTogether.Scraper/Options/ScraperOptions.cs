@@ -12,4 +12,7 @@ public class ScraperOptions
     public int PlayerSyncPeriodSeconds { get; set; } = 18000;
     public int GamesSyncPeriodMinutes { get; set; } = 1440;
     public int PlayersPerRun { get; set; } = 10;
+
+    [Required]
+    public int HttpCommandPort { get; init; }
 }
