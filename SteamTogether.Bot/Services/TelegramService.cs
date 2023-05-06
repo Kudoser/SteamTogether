@@ -1,4 +1,5 @@
-﻿using SteamTogether.Bot.Services.Command.Handlers;
+﻿using SteamTogether.Bot.Services.Command.Commands;
+using SteamTogether.Bot.Services.Command.Handlers;
 using SteamTogether.Bot.Services.Command.Parser;
 using SteamTogether.Core.Exceptions;
 using Telegram.Bot;
@@ -38,6 +39,8 @@ public class TelegramService : ITelegramService
             "Connected to {BotName}, starting receiving messages...",
             me.Username
         );
+
+        await _client.SetMyCommandsAsync(HelpCommand.GetCommands(), cancellationToken:cancellationToken);
 
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,

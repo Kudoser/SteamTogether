@@ -16,20 +16,18 @@ public class HelpCommand : ITelegramCommand
     public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
         var chatId = inputMessage.Chat.Id;
+        var commandsAsString =string.Join("\n",  GetCommands().Select(c => $"/{c.Command} - {c.Description}"));
         var help =
-            @"
+            @$"
 How to:
 
 * Get SteamID: https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC
 * run /add SteamID
 * wait for the next sync (by default it runs every 15 minutes)
 * run /play
-        
-/list - returns players ready to play
-/add [SteamPlayerId:int] - register to play. Example: /add 123
-/play [category name: string] - provides a list of common multiplayer games, search case-insensitive. Example /play co-op mmo
-/categories - list of game categories";
 
+{commandsAsString}";
+        
         await SendMessage(chatId, help);
     }
 
@@ -40,5 +38,16 @@ How to:
             text: message,
             cancellationToken: new CancellationToken()
         );
+    }
+
+    public static BotCommand[] GetCommands()
+    {
+        return new[]
+        {
+            new BotCommand {Command = "list", Description = "returns players ready to play"},
+            new BotCommand {Command = "add", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /add 123"},
+            new BotCommand {Command = "play", Description = "provides a list of common multiplayer games, search case-insensitive. Arguments: [category name: string]. Example /play \"Online pvp\" mmo"},
+            new BotCommand {Command = "categories", Description = "list of game categories"}
+        };
     }
 }
