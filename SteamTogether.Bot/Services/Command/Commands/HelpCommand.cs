@@ -27,7 +27,8 @@ How to:
         
 /list - returns players ready to play
 /add [SteamPlayerId:int] - register to play. Example: /add 123
-/play - provides a list of common multiplayer games";
+/play [category name: string] - provides a list of common multiplayer games, search case-insensitive. Example /play co-op mmo
+/categories - list of game categories";
 
         await SendMessage(chatId, help);
     }
