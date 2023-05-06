@@ -66,7 +66,13 @@ public class TelegramService : ITelegramService
             message.Text,
             message.Chat.Id
         );
-
+        
+        var botCommand = message.Entities?.FirstOrDefault(e => e.Type == MessageEntityType.BotCommand);
+        if (botCommand == null)
+        {
+            return;
+        }
+        
         try
         {
             var parsedResult = _telegramCommandParser.Parse(message.Text);
@@ -81,7 +87,7 @@ public class TelegramService : ITelegramService
         }
         catch (UnknownCommandException e)
         {
-            _logger.LogError("An error occured during command execution: {Error}", e.Message);
+            _logger.LogWarning("An error occured during command execution: {Error}", e.Message);
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Can't recognize command",

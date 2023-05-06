@@ -4,5 +4,5 @@ namespace SteamTogether.Bot.Services.Command.Commands;
 
 public interface ITelegramCommand
 {
-    public Task ExecuteAsync(Message inputMessage, IEnumerable<string> args);
+    public Task ExecuteAsync(Message inputMessage, string[] args);
 }

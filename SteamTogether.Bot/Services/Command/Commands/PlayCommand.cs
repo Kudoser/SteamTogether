@@ -9,6 +9,8 @@ namespace SteamTogether.Bot.Services.Command.Commands;
 public class PlayCommand : ITelegramCommand
 {
     public const string Name = "play";
+    private const string DefaultGameCategory = "Co-op";
+    
     private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<PlayCommand> _logger;
@@ -24,7 +26,7 @@ public class PlayCommand : ITelegramCommand
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
+    public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
         var chatId = inputMessage.Chat.Id;
 
@@ -36,31 +38,28 @@ public class PlayCommand : ITelegramCommand
             .FirstOrDefault();
 
         ArgumentNullException.ThrowIfNull(chat);
-
-        // @todo reconsider args and parameters
-        // @todo default category
-        uint categoryId = 9;
-        var unparsedCategoryId = args.FirstOrDefault();
-        if (unparsedCategoryId != null)
-        {
-            if (!uint.TryParse(unparsedCategoryId, out categoryId))
-            {
-                await SendMessage(chatId, $"Parse error");
-                return;
-            }
-        }
         
-        var category = _dbContext.SteamGamesCategories.FirstOrDefault(c => c.CategoryId == categoryId);
-        if (category == null)
+        var categoryNames = args.Any()
+            ? args
+            : new[] {DefaultGameCategory};
+
+        var categories = _dbContext.SteamGamesCategories
+            .Where(c => categoryNames.Select(_ => _.ToLower()).Contains(c.Description.ToLower()))
+            .ToArray();
+
+        var categoryIds = categories
+            .Select(c => c.CategoryId)
+            .ToArray();
+        
+        if (!categoryIds.Any())
         {
-            await SendMessage(chatId, $"Category {categoryId} doesn't exist");
+            await SendMessage(chatId, "Can't find such categories");
             return;
         }
-        
 
         var games = chat.Players
             .SelectMany(
-                player => player.Games.Where(game => game.Categories.Any(c => c.CategoryId == category.CategoryId)),
+                player => player.Games.Where(game => game.Categories.Any(c => categoryIds.Contains(c.CategoryId))),
                 (player, game) =>
                     new
                     {
@@ -88,7 +87,12 @@ public class PlayCommand : ITelegramCommand
             return;
         }
 
-        var messageLines = new List<string> {$"Category: {category.Description}({categoryId})"};
+        var categoryLines = categories
+            .Select(c => $"{c.Description}")
+            .ToArray();
+
+        var messageLines = new List<string> {$"Categories: {string.Join(",", categoryLines)}"};
+        
         var lines = games.Select(
             (g, i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})"
         );

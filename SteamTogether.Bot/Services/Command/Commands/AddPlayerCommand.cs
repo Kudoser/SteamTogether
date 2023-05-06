@@ -30,7 +30,7 @@ public class AddPlayerListCommand : ITelegramCommand
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
+    public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
         var chatId = inputMessage.Chat.Id;
         var unparsedPlayerId = args.FirstOrDefault();
