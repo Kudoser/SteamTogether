@@ -80,10 +80,12 @@ public class ScraperService : IScraperService
         }
         catch
         {
+            CleanUp();
             SyncStatus = ScraperSyncStatus.Error;
             throw;
         }
-        
+
+        CleanUp();
         SyncStatus = ScraperSyncStatus.Waiting;
     }
 
@@ -124,7 +126,6 @@ public class ScraperService : IScraperService
             player.Games.Add(game);
         }
     }
-
 
     private async Task<SteamGame?> InsertOrUpdateGameAsync(uint gameId)
     {
@@ -216,5 +217,11 @@ public class ScraperService : IScraperService
                 game.Categories.Add(gameCategory);
             }
         }
+    }
+
+    private void CleanUp()
+    {
+        _allGames.Clear();
+        _allGameCategories.Clear();
     }
 }
