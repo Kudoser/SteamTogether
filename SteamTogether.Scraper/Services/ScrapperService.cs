@@ -161,9 +161,9 @@ public class ScrapperService : IScrapperService
             }
 
             SyncCategories(game, storeApp);
+            
+            game.LastSyncDateTime = _dateTimeService.UtcNow;
         }
-
-        game.LastSyncDateTime = _dateTimeService.UtcNow;
         
         return game;
     }
