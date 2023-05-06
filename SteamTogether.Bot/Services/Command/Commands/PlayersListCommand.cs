@@ -23,7 +23,7 @@ public class PlayersListCommand : ITelegramCommand
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
+    public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
         var chat = await _dbContext.TelegramChat
             .Include(chat => chat.Players)

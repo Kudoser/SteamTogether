@@ -13,7 +13,7 @@ public class HelpCommand : ITelegramCommand
         _telegramClient = telegramClient;
     }
 
-    public async Task ExecuteAsync(Message inputMessage, IEnumerable<string> args)
+    public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
         var chatId = inputMessage.Chat.Id;
         var help =

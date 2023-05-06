@@ -47,7 +47,7 @@ A simple telegram bot based on [C# Telegram bot](https://github.com/TelegramBots
 help - how to
 list - returns the list of Steam players at the same chat ready to participate
 add - adds a new Steam player id (@todo: and optionally Steam API key). Example: /add 123
-play - provides a list of common multiplayer games, params: category name. Example: /play 1. Default category: 9
+play - provides a list of common multiplayer games, params: category name. Example: /play PvP. Default category: Co-op
 categories - provides a list of all possible games categories
 ```
 
