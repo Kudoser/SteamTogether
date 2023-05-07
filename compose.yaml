@@ -1,3 +1,4 @@
+---
 services:
   bot:
     build:
@@ -19,6 +20,7 @@ services:
       - BOT_STEAM__APIKEY=${BOT_STEAM__APIKEY}
       - BOT_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
       - BOT_HEALTHCHECK__PORT=${BOT_HEALTHCHECK__PORT:?}
+      - BOT_SCRAPERCLIENT__URL=http://scraper:${SCRAPER_HTTPSERVER__PORT:?}
     volumes:
       - data:/data
 
@@ -37,6 +39,7 @@ services:
       - SCRAPER_STEAM__APIKEY=${SCRAPER_STEAM__APIKEY}
       - SCRAPER_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
       - SCRAPER_SCRAPER__RUNONSTARTUP=true
+      - SCRAPER_HTTPSERVER__PORT=${SCRAPER_HTTPSERVER__PORT:?}
       - BOT_HEALTHCHECK_URL=http://bot:${BOT_HEALTHCHECK__PORT:?}
     volumes:
       - data:/data

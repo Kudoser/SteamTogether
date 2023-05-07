@@ -53,6 +53,7 @@ jobs:
           BOT_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
           BOT_TELEGRAM__TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          SCRAPER_HTTPSERVER__PORT: 10091
           SCRAPER_STEAM__APIKEY: ${{ secrets.STEAM_APIKEY }}
           VERSION: ${{ steps.version.outputs.version }}
 
