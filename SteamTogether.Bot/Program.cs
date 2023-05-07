@@ -45,8 +45,8 @@ var host = Host.CreateDefaultBuilder()
                 .Bind(builder.Configuration.GetSection(HealthCheckOptions.HealthCheck))
                 .ValidateDataAnnotations();
             services
-                .AddOptions<HttpServerOptions>()
-                .Bind(builder.Configuration.GetSection(HttpServerOptions.HttpServer))
+                .AddOptions<ScraperClientOptions>()
+                .Bind(builder.Configuration.GetSection(ScraperClientOptions.ScraperClient))
                 .ValidateDataAnnotations();
 
             services.RegisterDatabaseServices();
