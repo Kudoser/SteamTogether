@@ -26,6 +26,10 @@ public class WorkerTests
                     {
                         opts.RunOnStartup = false;
                         opts.Schedule = "* * * * * *";
+                        opts.HttpServer = new HttpServerOptions
+                        {
+                            Enabled = false
+                        };
                     });
 
                 services

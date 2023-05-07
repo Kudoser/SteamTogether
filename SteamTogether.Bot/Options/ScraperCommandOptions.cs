@@ -8,4 +8,5 @@ public class ScraperCommandOptions
 
     [Required]
     public string Port { get; set; } = default!;
+    public string Url { get; set; } = default!;
 }

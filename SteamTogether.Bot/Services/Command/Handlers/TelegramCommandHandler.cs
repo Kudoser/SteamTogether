@@ -62,8 +62,7 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
         if (name == SyncCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<SyncCommand>();
-            return new SyncCommand(_telegramClient, _scraperCommandClient, logger);
+            return new SyncCommand(_telegramClient, _scraperCommandClient);
         }
 
         throw new UnknownCommandException($"Unknown command name={name}]");

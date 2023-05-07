@@ -12,7 +12,7 @@ namespace SteamTogether.Scraper.Services;
 
 public class HttpCommandListener : IHttpCommandListener
 {
-    private readonly ScraperOptions _options;
+    private readonly HttpServerOptions _options;
     private readonly ILogger<HttpCommandListener> _logger;
     private readonly HttpListener _httpListener;
 
@@ -21,24 +21,36 @@ public class HttpCommandListener : IHttpCommandListener
         ILogger<HttpCommandListener> logger
     )
     {
-        _options = options.Value;
+        _options = options.Value.HttpServer;
         _logger = logger;
         _httpListener = new HttpListener();
     }
 
     public Task StartAsync()
     {
-        var url = $"http://*:{_options.HttpCommandPort}/";
+        _logger.LogDebug("StartAsync called");
+        if (!_options.Enabled)
+        {
+            return Task.CompletedTask;    
+        }
+
+        var url = $"http://*:{_options.Port}/";
         _httpListener.Prefixes.Add(url);
 
-        _logger.LogInformation("Start listening http commands on {Url}", url);
         _httpListener.Start();
+        _logger.LogInformation("Start listening http commands on {Url}", url);
 
         return Task.CompletedTask;
     }
 
     public async Task ReceiveAsync(IScraperService scraper)
     {
+        _logger.LogDebug("ReceiveAsync called");
+        if (!_options.Enabled)
+        {
+            return;    
+        }
+        
         var context = await _httpListener.GetContextAsync();
         if (context == null)
         {
@@ -60,7 +72,7 @@ public class HttpCommandListener : IHttpCommandListener
         {
             await RespondWithStatus(
                 context.Response, 
-                new ScraperErrorResponse {Error = "Unknown command"},
+                new ScraperCommandResponse {Success = false, Message = "Unknown command"},
                 HttpStatusCode.BadRequest);
             
             return;
@@ -70,7 +82,7 @@ public class HttpCommandListener : IHttpCommandListener
         {
             var currentStatus = scraper.SyncStatus;
             _logger.LogInformation("Status command requested, current status: {Status}", currentStatus);
-            var scraperResponse = new ScraperStatusResponse { Status = currentStatus };
+            var scraperResponse = new ScraperStatusResponse { Success = true, Status = currentStatus };
             await RespondWithStatus(context.Response, scraperResponse, HttpStatusCode.OK);
             return;
         }
@@ -79,7 +91,7 @@ public class HttpCommandListener : IHttpCommandListener
         {
             if (scraper.SyncStatus == ScraperSyncStatus.InProgress)
             {
-                await RespondWithStatus(context.Response, new { Error = "Busy" }, HttpStatusCode.ServiceUnavailable);
+                await RespondWithStatus(context.Response, new ScraperCommandResponse { Success = false, Message = "In progress" }, HttpStatusCode.ServiceUnavailable);
                 return;
             }
             
@@ -94,19 +106,19 @@ public class HttpCommandListener : IHttpCommandListener
                 }
                 catch (Exception)
                 { 
-                    await RespondWithStatus(context.Response, new { Error = "Wrong arguments" }, HttpStatusCode.BadRequest);
+                    await RespondWithStatus(context.Response, new ScraperCommandResponse { Success = false, Message = "Wrong arguments" }, HttpStatusCode.BadRequest);
                     return;
                 }
             }
             
             _logger.LogInformation("Sync has requested by http command");
             scraper.RunSync(playerIds);
-            var scraperResponse = new { Result = "Started" };
+            var scraperResponse = new ScraperCommandResponse { Success = true };
             await RespondWithStatus(context.Response, scraperResponse, HttpStatusCode.Accepted);
             return;
         }
         
-        var errorResponse = new ScraperErrorResponse { Error = "Unknown command" };
+        var errorResponse = new ScraperCommandResponse { Success = false, Message = "Unknown command" };
         await RespondWithStatus(context.Response, errorResponse, HttpStatusCode.NotFound);
     }
 

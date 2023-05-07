@@ -8,26 +8,26 @@ public class SyncCommand : ITelegramCommand
     public const string Name = "sync";
     private readonly ITelegramBotClient _telegramClient;
     private readonly IScraperCommandClient _commandClient;
-    private readonly ILogger<SyncCommand> _logger;
 
     public SyncCommand(
         ITelegramBotClient telegramClient,
-        IScraperCommandClient commandClient,
-        ILogger<SyncCommand> logger
+        IScraperCommandClient commandClient
     )
     {
         _telegramClient = telegramClient;
         _commandClient = commandClient;
-        _logger = logger;
     }
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
         var chatId = inputMessage.Chat.Id;
 
-        var result = await _commandClient.RequestSync(args);
+        var result = await _commandClient.RequestSyncAsync(args);
+        var response = result.Success
+            ? "Sync has started"
+            : result.Message ?? "Error has occurred";
         
-        await SendMessage(chatId, result);
+        await SendMessage(chatId, response);
     }
 
     private async Task SendMessage(long chatId, string message)

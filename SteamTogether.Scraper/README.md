@@ -56,7 +56,9 @@ GET http://localhost:8080 {"Command": 0}
 #### Response: 200 OK 
 ```json
 {
-    "Status": 0
+  "Status": 0,
+  "Success": true,
+  "Message": null
 }
 ```
 
@@ -66,18 +68,20 @@ GET http://localhost:8080 {"Command": 0}
 ```http request
 GET http://localhost:8080 {"Command": 1, "Arguments": ["123456789"]}
 ```
-* Result - enum [Success|Busy]
+* Result - enum [Success|In Progress]
 
 #### Response: 200 OK
 ```json
 {
-    "Result": "Success"
+  "Success": true,
+  "Message": null
 }
 ```
 
 #### Response: 503 ServiceUnavailable
 ```json
 {
-    "Result": "Busy"
+  "Success": false,
+  "Message": "In Progress"
 }
 ```

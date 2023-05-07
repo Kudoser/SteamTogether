@@ -11,7 +11,6 @@ public class ScraperWorker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ScraperWorker> _logger;
-    private DateTime? _nextSync;
 
     public ScraperWorker(
         IServiceProvider serviceProvider,
@@ -37,11 +36,16 @@ public class ScraperWorker : BackgroundService
         var scraper = scope.ServiceProvider.GetRequiredService<IScraperService>();
         var dateTimeService = scope.ServiceProvider.GetRequiredService<IDateTimeService>();
         var options = scope.ServiceProvider.GetRequiredService<IOptions<ScraperOptions>>().Value;
-        var httpListener = scope.ServiceProvider.GetRequiredService<IHttpCommandListener>();
-        
-        await httpListener.StartAsync();
-        WaitForHttpListenerAsync(httpListener, scraper, ct);
-        
+
+        _logger.LogInformation("HttpServer Enabled={Enabled}", options.HttpServer.Enabled);
+        if (options.HttpServer.Enabled)
+        {
+            var httpListener = scope.ServiceProvider.GetRequiredService<IHttpCommandListener>();
+            await httpListener.StartAsync();
+            WaitForHttpListenerAsync(httpListener, scraper, ct);
+        }
+
+        _logger.LogInformation("RunOnStartup Enabled={RunOnStartup}", options.RunOnStartup);
         if (options.RunOnStartup)
         {
             await scraper.RunSync();
@@ -49,8 +53,6 @@ public class ScraperWorker : BackgroundService
         
         _logger.LogInformation("Using schedule: {Schedule}", options.Schedule);
         var cron = CronExpression.Parse(options.Schedule, CronFormat.IncludeSeconds);
-        _nextSync = cron.GetNextOccurrence(dateTimeService.UtcNow);
-        
         while (!ct.IsCancellationRequested)
         {
             var utcNow = dateTimeService.UtcNow;

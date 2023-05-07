@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using SteamTogether.Bot.Options;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Models.Requests;
+using SteamTogether.Core.Models.Responses;
 
 namespace SteamTogether.Bot.Services;
 
@@ -18,22 +19,22 @@ public class ScraperCommandHttpClient : IScraperCommandClient
         _options = options.Value;
     }
 
-    public async Task<string> RequestSync(string[] playerIds)
+    public async Task<ScraperCommandResponse> RequestSyncAsync(string[] playerIds)
     {
         var httpClient = _httpClientFactory.CreateClient(nameof(ScraperCommandHttpClient));
         var command = new ScraperCommandRequest {Command = CommandRequest.Sync, Arguments = playerIds};
         
-        using StringContent jsonContent = new(
-            JsonSerializer.Serialize(command),
-            Encoding.UTF8,
-            "application/json");
-        var result = await httpClient.PostAsync($"http://localhost:{_options.Port}", jsonContent);
-
-        result.EnsureSuccessStatusCode();
-        return await result.Content.ReadAsStringAsync();
+        using var jsonContent = new StringContent(JsonSerializer.Serialize(command), Encoding.UTF8, "application/json");
+        var result = await httpClient.PostAsync($"{_options.Url}:{_options.Port}", jsonContent);
+        var content = await result.Content.ReadAsStringAsync();
+        
+        var commandResponse = JsonSerializer.Deserialize<ScraperCommandResponse>(content);
+        ArgumentNullException.ThrowIfNull(commandResponse);
+        
+        return commandResponse;
     }
 
-    public Task RequestStatus()
+    public Task RequestStatusAsync()
     {
         throw new NotImplementedException();
     }
@@ -41,6 +42,6 @@ public class ScraperCommandHttpClient : IScraperCommandClient
 
 public interface IScraperCommandClient
 {
-    public Task<string> RequestSync(string[] playerIds);
-    public Task RequestStatus();
+    public Task<ScraperCommandResponse> RequestSyncAsync(string[] playerIds);
+    public Task RequestStatusAsync();
 }
