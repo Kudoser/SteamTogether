@@ -17,6 +17,8 @@ public class TelegramService : ITelegramService
     private readonly ITelegramCommandHandler _telegramCommandHandler;
     private readonly ILogger<ITelegramService> _logger;
 
+    private string? BotName { get; set; }
+
     public TelegramService(
         ITelegramBotClient client,
         ITelegramCommandParser telegramCommandParser,
@@ -32,16 +34,14 @@ public class TelegramService : ITelegramService
 
     public async Task StartReceivingAsync(CancellationToken cancellationToken)
     {
-        ReceiverOptions receiverOptions = new() { AllowedUpdates = Array.Empty<UpdateType>() };
-
         var me = await _client.GetMeAsync(cancellationToken);
-        _logger.LogInformation(
-            "Connected to {BotName}, starting receiving messages...",
-            me.Username
-        );
-
+        _logger.LogInformation("Connected to {BotName}, starting receiving messages...", me.Username);
+        BotName = me.Username;
+        
+        _logger.LogInformation("Updating commands list");
         await _client.SetMyCommandsAsync(HelpCommand.GetCommands(), cancellationToken:cancellationToken);
 
+        ReceiverOptions receiverOptions = new() { AllowedUpdates = Array.Empty<UpdateType>() };
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,
             pollingErrorHandler: HandlePollingErrorAsync,
@@ -56,6 +56,8 @@ public class TelegramService : ITelegramService
         CancellationToken cancellationToken
     )
     {
+        ArgumentException.ThrowIfNullOrEmpty(BotName);
+        
         // Only process Message updates: https://core.telegram.org/bots/api#message
         if (update.Message is not { } message)
             return;
@@ -78,7 +80,7 @@ public class TelegramService : ITelegramService
         
         try
         {
-            var parsedResult = _telegramCommandParser.Parse(message.Text);
+            var parsedResult = _telegramCommandParser.Parse(message.Text, BotName);
             if (!parsedResult.Parsed)
             {
                 return;

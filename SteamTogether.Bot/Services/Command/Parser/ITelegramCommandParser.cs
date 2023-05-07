@@ -2,5 +2,5 @@
 
 public interface ITelegramCommandParser
 {
-    public ParseResult Parse(string input);
+    public ParseResult Parse(string input, string botName);
 }
