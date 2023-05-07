@@ -25,7 +25,7 @@ public class ScraperCommandHttpClient : IScraperCommandClient
         var command = new ScraperCommandRequest {Command = CommandRequest.Sync, Arguments = playerIds};
         
         using var jsonContent = new StringContent(JsonSerializer.Serialize(command), Encoding.UTF8, "application/json");
-        var result = await httpClient.PostAsync($"{_options.Url}:{_options.Port}", jsonContent);
+        var result = await httpClient.PostAsync(_options.Url, jsonContent);
         var content = await result.Content.ReadAsStringAsync();
         
         var commandResponse = JsonSerializer.Deserialize<ScraperCommandResponse>(content);
@@ -40,7 +40,7 @@ public class ScraperCommandHttpClient : IScraperCommandClient
         var command = new ScraperCommandRequest {Command = CommandRequest.Status};
         
         using var jsonContent = new StringContent(JsonSerializer.Serialize(command), Encoding.UTF8, "application/json");
-        var result = await httpClient.PostAsync($"{_options.Url}:{_options.Port}", jsonContent);
+        var result = await httpClient.PostAsync(_options.Url, jsonContent);
         var content = await result.Content.ReadAsStringAsync();
         
         var commandResponse = JsonSerializer.Deserialize<ScraperStatusResponse>(content);
