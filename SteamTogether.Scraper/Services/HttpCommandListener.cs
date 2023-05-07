@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using SteamTogether.Core.Models;
 using SteamTogether.Core.Models.Requests;
 using SteamTogether.Core.Models.Responses;
-using SteamTogether.Scraper.Options;
+using SteamTogether.Core.Options;
 
 namespace SteamTogether.Scraper.Services;
 
@@ -17,11 +17,11 @@ public class HttpCommandListener : IHttpCommandListener
     private readonly HttpListener _httpListener;
 
     public HttpCommandListener(
-        IOptions<ScraperOptions> options,
+        IOptions<HttpServerOptions> options,
         ILogger<HttpCommandListener> logger
     )
     {
-        _options = options.Value.HttpServer;
+        _options = options.Value;
         _logger = logger;
         _httpListener = new HttpListener();
     }
@@ -34,10 +34,10 @@ public class HttpCommandListener : IHttpCommandListener
             return Task.CompletedTask;    
         }
 
-        _httpListener.Prefixes.Add(_options.Url);
+        _httpListener.Prefixes.Add(_options.BaseUrl.ToString());
 
         _httpListener.Start();
-        _logger.LogInformation("Start listening http commands on {Url}", _options.Url);
+        _logger.LogInformation("Start listening http commands on {BaseUrl}", _options.BaseUrl);
 
         return Task.CompletedTask;
     }

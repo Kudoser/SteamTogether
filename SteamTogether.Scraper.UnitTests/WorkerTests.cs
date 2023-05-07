@@ -8,6 +8,7 @@ using SteamTogether.Core.Options;
 using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
+using HttpServerOptions = SteamTogether.Core.Options.HttpServerOptions;
 
 namespace SteamTogether.Scraper.UnitTests;
 
@@ -22,14 +23,14 @@ public class WorkerTests
             .ConfigureServices((builder, services) =>
             {
                 services
+                    .Configure<HttpServerOptions>(opts =>
+                    {
+                        opts.Enabled = false;
+                    })
                     .Configure<ScraperOptions>(opts =>
                     {
                         opts.RunOnStartup = false;
                         opts.Schedule = "* * * * * *";
-                        opts.HttpServer = new HttpServerOptions
-                        {
-                            Enabled = false
-                        };
                     });
 
                 services

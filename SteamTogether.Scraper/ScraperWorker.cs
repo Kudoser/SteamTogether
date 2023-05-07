@@ -4,6 +4,7 @@ using SteamTogether.Core.Services;
 using SteamTogether.Scraper.Options;
 using SteamTogether.Scraper.Services;
 using System.Reflection;
+using SteamTogether.Core.Options;
 
 namespace SteamTogether.Scraper;
 
@@ -36,9 +37,10 @@ public class ScraperWorker : BackgroundService
         var scraper = scope.ServiceProvider.GetRequiredService<IScraperService>();
         var dateTimeService = scope.ServiceProvider.GetRequiredService<IDateTimeService>();
         var options = scope.ServiceProvider.GetRequiredService<IOptions<ScraperOptions>>().Value;
+        var httpServerOptions = scope.ServiceProvider.GetRequiredService<IOptions<HttpServerOptions>>().Value;
 
-        _logger.LogInformation("HttpServer Enabled={Enabled}", options.HttpServer.Enabled);
-        if (options.HttpServer.Enabled)
+        _logger.LogInformation("HttpServer Enabled={Enabled}", httpServerOptions.Enabled);
+        if (httpServerOptions.Enabled)
         {
             var httpListener = scope.ServiceProvider.GetRequiredService<IHttpCommandListener>();
             await httpListener.StartAsync();
