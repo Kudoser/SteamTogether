@@ -39,35 +39,42 @@ public class ScraperWorker : BackgroundService
         var options = scope.ServiceProvider.GetRequiredService<IOptions<ScraperOptions>>().Value;
         var httpListener = scope.ServiceProvider.GetRequiredService<IHttpCommandListener>();
         
+        await httpListener.StartAsync();
+        WaitForHttpListenerAsync(httpListener, scraper, ct);
+        
         if (options.RunOnStartup)
         {
             await scraper.RunSync();
         }
-
-        await httpListener.StartAsync();
         
         _logger.LogInformation("Using schedule: {Schedule}", options.Schedule);
         var cron = CronExpression.Parse(options.Schedule, CronFormat.IncludeSeconds);
         _nextSync = cron.GetNextOccurrence(dateTimeService.UtcNow);
+        
         while (!ct.IsCancellationRequested)
         {
-            httpListener.ReceiveAsync(scraper);
-            WaitForScraperNextRun(scraper, dateTimeService, cron, ct);
+            var utcNow = dateTimeService.UtcNow;
+            var utcNext = cron.GetNextOccurrence(utcNow);
+
+            if (utcNext == null)
+            {
+                _logger.LogWarning("No next run found, stopping worker");
+                break;
+            }
+
+            var delay = utcNext.Value - utcNow;
+            _logger.LogInformation("Next worker run: {Next} (in {Delay})", utcNext.Value, delay);
+
+            await Task.Delay(delay, ct);
+            await scraper.RunSync();
         }
     }
 
-    private async Task WaitForScraperNextRun(IScraperService scraper, IDateTimeService dateTimeService, CronExpression cron, CancellationToken ct)
+    private async Task WaitForHttpListenerAsync(IHttpCommandListener httpListener, IScraperService scraper, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(_nextSync);
-        
-        var utcNow = dateTimeService.UtcNow;
-        if (_nextSync <= dateTimeService.UtcNow)
+        while (!ct.IsCancellationRequested)
         {
-            _nextSync = cron.GetNextOccurrence(utcNow);
-            var delay = _nextSync.Value - utcNow;
-            
-            _logger.LogInformation("Next worker run: {Next} (in {Delay})", _nextSync.Value, delay);
-            scraper.RunSync();
+            await httpListener.ReceiveAsync(scraper);
         }
     }
 }

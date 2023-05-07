@@ -112,8 +112,8 @@ public class HttpCommandListener : IHttpCommandListener
 
     private static async Task RespondWithStatus(HttpListenerResponse response, object model, HttpStatusCode code)
     {
-        await RespondWithContent(response, model);
         response.StatusCode = (int)code;
+        await RespondWithContent(response, model);
     }
 
     private static async Task RespondWithContent(HttpListenerResponse response, object model)
