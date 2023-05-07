@@ -40,6 +40,7 @@ services:
       - SCRAPER_DATABASE__CONNECTIONSTRING=Data Source=/data/database.db
       - SCRAPER_SCRAPER__RUNONSTARTUP=true
       - SCRAPER_HTTPSERVER__PORT=${SCRAPER_HTTPSERVER__PORT:?}
+      - SCRAPER_HTTPSERVER__URL=http://+:${SCRAPER_HTTPSERVER__PORT:?}
       - BOT_HEALTHCHECK_URL=http://bot:${BOT_HEALTHCHECK__PORT:?}
     volumes:
       - data:/data
