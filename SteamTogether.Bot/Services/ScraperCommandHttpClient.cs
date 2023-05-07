@@ -21,6 +21,15 @@ public class ScraperCommandHttpClient : IScraperCommandClient
 
     public async Task<ScraperCommandResponse> RequestSyncAsync(string[] playerIds)
     {
+        if (!_options.Enabled)
+        {
+            return new ScraperCommandResponse
+            {
+                Success = false,
+                Message = "Http server is disabled"
+            };
+        }
+        
         var httpClient = _httpClientFactory.CreateClient(nameof(ScraperCommandHttpClient));
         var command = new ScraperCommandRequest {Command = CommandRequest.Sync, Arguments = playerIds};
         
@@ -36,6 +45,15 @@ public class ScraperCommandHttpClient : IScraperCommandClient
 
     public async Task<ScraperStatusResponse> RequestStatusAsync()
     {
+        if (!_options.Enabled)
+        {
+            return new ScraperStatusResponse
+            {
+                Success = false,
+                Message = "Http server is disabled"
+            };
+        }
+        
         var httpClient = _httpClientFactory.CreateClient(nameof(ScraperCommandHttpClient));
         var command = new ScraperCommandRequest {Command = CommandRequest.Status};
         
