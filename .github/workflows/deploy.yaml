@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          # Fetch all history for all tags and branches to generate version number
+          fetch-depth: 0
 
       - name: Setup known hosts
         run: |
