@@ -40,7 +40,9 @@ Scrape games from steam
 - `PlayersSyncPeriodSeconds` - a period in seconds to sync players, default = 18000 (5 hours).
 - `GamesSyncPeriodMinutes` - a period in minutes to sync games, default = 10080 (7 days).
 - `PlayersPerRun` - how many players to process per one run, default = 10.
-- `HttpCommandPort` - http listener port, default = 10091.
+- `HttpServer`
+  - `Url` - Host endpoint to listen to requests
+  - `Enabled` - `true`/`false`
 
 ## Http listener commands
 

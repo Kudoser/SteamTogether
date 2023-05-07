@@ -34,11 +34,10 @@ public class HttpCommandListener : IHttpCommandListener
             return Task.CompletedTask;    
         }
 
-        var url = $"http://*:{_options.Port}/";
-        _httpListener.Prefixes.Add(url);
+        _httpListener.Prefixes.Add(_options.Url);
 
         _httpListener.Start();
-        _logger.LogInformation("Start listening http commands on {Url}", url);
+        _logger.LogInformation("Start listening http commands on {Url}", _options.Url);
 
         return Task.CompletedTask;
     }

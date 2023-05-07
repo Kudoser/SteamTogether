@@ -4,7 +4,6 @@ namespace SteamTogether.Scraper.Options;
 
 public class HttpServerOptions
 {
-    [Required]
-    public int Port { get; init; }
+    [Required] public string Url { get; init; } = default!;
     public bool Enabled { get; init; }
 }
