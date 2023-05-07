@@ -44,6 +44,7 @@ jobs:
         env:
           BOT_HEALTHCHECK__PORT: 10090
           DOCKER_HOST: "${{ secrets.DOCKER_HOST }}"
+          SCRAPER_HTTPSERVER__PORT: 10091
           VERSION: ${{ steps.version.outputs.version }}
 
       - name: Docker Compose up
