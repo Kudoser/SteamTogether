@@ -65,6 +65,11 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             return new SyncCommand(_telegramClient, _scraperCommandClient);
         }
 
+        if (name == ScraperStatusCommand.Name)
+        {
+            return new ScraperStatusCommand(_telegramClient, _scraperCommandClient);
+        }
+
         throw new UnknownCommandException($"Unknown command name={name}]");
     }
 }

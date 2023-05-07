@@ -34,14 +34,24 @@ public class ScraperCommandHttpClient : IScraperCommandClient
         return commandResponse;
     }
 
-    public Task RequestStatusAsync()
+    public async Task<ScraperStatusResponse> RequestStatusAsync()
     {
-        throw new NotImplementedException();
+        var httpClient = _httpClientFactory.CreateClient(nameof(ScraperCommandHttpClient));
+        var command = new ScraperCommandRequest {Command = CommandRequest.Status};
+        
+        using var jsonContent = new StringContent(JsonSerializer.Serialize(command), Encoding.UTF8, "application/json");
+        var result = await httpClient.PostAsync($"{_options.Url}:{_options.Port}", jsonContent);
+        var content = await result.Content.ReadAsStringAsync();
+        
+        var commandResponse = JsonSerializer.Deserialize<ScraperStatusResponse>(content);
+        ArgumentNullException.ThrowIfNull(commandResponse);
+        
+        return commandResponse;
     }
 }
 
 public interface IScraperCommandClient
 {
     public Task<ScraperCommandResponse> RequestSyncAsync(string[] playerIds);
-    public Task RequestStatusAsync();
+    public Task<ScraperStatusResponse> RequestStatusAsync();
 }
