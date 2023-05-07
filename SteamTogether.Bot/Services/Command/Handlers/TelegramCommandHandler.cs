@@ -62,7 +62,8 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
         if (name == SyncCommand.Name)
         {
-            return new SyncCommand(_telegramClient, _scraperCommandClient);
+            var logger = _loggerFactory.CreateLogger<SyncCommand>();
+            return new SyncCommand(_telegramClient, _scraperCommandClient, logger);
         }
 
         if (name == ScraperStatusCommand.Name)

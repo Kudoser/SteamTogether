@@ -101,10 +101,10 @@ public class TelegramService : ITelegramService
         }
         catch (Exception e)
         {
-            _logger.LogError("An error occured during command execution: {Error}", e.Message);
+            _logger.LogError("An error occurred during command execution: {Error}", e.Message);
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: "Unexpected error",
+                text: $"An error occurred during command execution: {e.Message}",
                 cancellationToken: cancellationToken
             );
         }
