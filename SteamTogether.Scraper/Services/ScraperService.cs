@@ -9,62 +9,100 @@ using SteamTogether.Scraper.Options;
 
 namespace SteamTogether.Scraper.Services;
 
-public class ScrapperService : IScrapperService
+public class ScraperService : IScraperService
 {
     private readonly ScraperOptions _options;
     private readonly ISteamService _steamService;
     private readonly IDateTimeService _dateTimeService;
-    private readonly ILogger<ScrapperService> _logger;
+    private readonly ILogger<ScraperService> _logger;
     private readonly ApplicationDbContext _dbContext;
     
+    public ScraperSyncStatus SyncStatus { get; set; }
     private List<SteamGame> _allGames = new();
     private List<SteamGameCategory> _allGameCategories = new();
 
-    public ScrapperService(
+    public ScraperService(
         ISteamService steamService,
         IOptions<ScraperOptions> options,
         ApplicationDbContext dbContext,
         IDateTimeService dateTimeService,
-        ILogger<ScrapperService> logger
-    )
+        ILogger<ScraperService> logger)
     {
         _options = options.Value;
         _steamService = steamService;
         _dbContext = dbContext;
         _dateTimeService = dateTimeService;
         _logger = logger;
+        SyncStatus = ScraperSyncStatus.Waiting;
     }
 
     public async Task RunSync()
     {
-        _logger.LogInformation("Starting sync...");
-        var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
-        var steamPlayers = _dbContext.SteamPlayers
-            .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
-            .Include(player => player.Games)
-            .Take(_options.PlayersPerRun)
-            .ToArray();
+        await RunSync(Array.Empty<ulong>());
+    }
 
-        if (!steamPlayers.Any())
+    public async Task RunSync(ulong[] playerIds)
+    {
+        if (SyncStatus == ScraperSyncStatus.InProgress)
         {
-            _logger.LogInformation("Nothing to process");
+            _logger.LogInformation("Sync in process...");
             return;
         }
-        _allGames = _dbContext.SteamGames
-            .Include(g => g.Categories)
-            .ToList();
-
-        _allGameCategories = _dbContext.SteamGamesCategories
-            .ToList();
         
-        foreach (var player in steamPlayers)
+        SyncStatus = ScraperSyncStatus.InProgress;
+        try
         {
-            await SyncPlayerAsync(player);
+            SteamPlayer[] steamPlayers;
+            if (playerIds.Any())
+            {
+                steamPlayers = _dbContext.SteamPlayers
+                    .Where(p => playerIds.Contains(p.PlayerId))
+                    .Include(player => player.Games)
+                    .ToArray();
+            }
+            else
+            {
+                var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
+                steamPlayers = _dbContext.SteamPlayers
+                    .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
+                    .Include(player => player.Games)
+                    .Take(_options.PlayersPerRun)
+                    .ToArray();
+            }
+
+            if (!steamPlayers.Any())
+            {
+                _logger.LogInformation("Nothing to process");
+                SyncStatus = ScraperSyncStatus.Waiting;
+                return;
+            }
+
+            _allGames = _dbContext.SteamGames
+                .Include(g => g.Categories)
+                .ToList();
+
+            _allGameCategories = _dbContext.SteamGamesCategories
+                .ToList();
+
+            _logger.LogInformation("Starting sync for {Count} players...", steamPlayers.Length);
+            foreach (var player in steamPlayers)
+            {
+                await SyncPlayerAsync(player);
+            }
+
+            var count = await _dbContext.SaveChangesAsync();
+            _logger.LogInformation("{Count} items over all were saved", count);
+            _logger.LogInformation("Done");
+        }
+        catch
+        {
+            CleanUp();
+            SyncStatus = ScraperSyncStatus.Error;
+            throw;
         }
 
-        var count = await _dbContext.SaveChangesAsync();
-        _logger.LogInformation("{Count} items over all were saved", count);
-        _logger.LogInformation("Done");
+        CleanUp();
+        SyncStatus = ScraperSyncStatus.Waiting;
     }
 
     private async Task SyncPlayerAsync(SteamPlayer player)
@@ -104,7 +142,6 @@ public class ScrapperService : IScrapperService
             player.Games.Add(game);
         }
     }
-
 
     private async Task<SteamGame?> InsertOrUpdateGameAsync(uint gameId)
     {
@@ -196,5 +233,11 @@ public class ScrapperService : IScrapperService
                 game.Categories.Add(gameCategory);
             }
         }
+    }
+
+    private void CleanUp()
+    {
+        _allGames.Clear();
+        _allGameCategories.Clear();
     }
 }

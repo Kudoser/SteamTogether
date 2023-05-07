@@ -44,7 +44,7 @@ public class ScraperTests
 
                 services
                     .AddScoped<IDateTimeService, DateTimeService>()
-                    .AddScoped<IScrapperService, ScrapperService>();
+                    .AddScoped<IScraperService, ScraperService>();
 
                 services
                     .AddLogging(x => x.AddConsole())
@@ -114,7 +114,7 @@ public class ScraperTests
         _builder.ConfigureServices(services =>
         {
             services.AddSingleton<ISteamService>(_ => mockedSteamService.Object);
-            services.AddSingleton<IHostedService, Worker>();
+            services.AddSingleton<IHostedService, ScraperWorker>();
         });
 
         var host = _builder.Build();
@@ -125,7 +125,7 @@ public class ScraperTests
         await dbContext.SteamPlayers.AddAsync(newPLayer);
         await dbContext.SaveChangesAsync();
 
-        var scraper = host.Services.GetRequiredService<IScrapperService>();
+        var scraper = host.Services.GetRequiredService<IScraperService>();
         await scraper.RunSync();
 
         var player = dbContext.SteamPlayers

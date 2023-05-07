@@ -47,7 +47,9 @@ How to:
             new BotCommand {Command = "list", Description = "returns players ready to play"},
             new BotCommand {Command = "add", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /add 123"},
             new BotCommand {Command = "play", Description = "provides a list of common multiplayer games, search case-insensitive. Arguments: [category name: string]. Example /play \"Online pvp\" mmo"},
-            new BotCommand {Command = "categories", Description = "list of game categories"}
+            new BotCommand {Command = "categories", Description = "list of game categories"},
+            new BotCommand {Command = "sync", Description = "sync players & games. Arguments: [SteamPlayerId:int]. Example: /sync 123"},
+            new BotCommand {Command = "status", Description = "status of the scraper sync"}
         };
     }
 }

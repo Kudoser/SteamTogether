@@ -26,6 +26,10 @@ public class WorkerTests
                     {
                         opts.RunOnStartup = false;
                         opts.Schedule = "* * * * * *";
+                        opts.HttpServer = new HttpServerOptions
+                        {
+                            Enabled = false
+                        };
                     });
 
                 services
@@ -34,7 +38,7 @@ public class WorkerTests
 
                 services
                     .AddScoped<IDateTimeService, DateTimeService>()
-                    .AddScoped<IScrapperService, ScrapperService>();
+                    .AddScoped<IScraperService, ScraperService>();
 
                 services
                     .AddLogging(x => x.AddConsole())
@@ -46,11 +50,11 @@ public class WorkerTests
     [Fact]
     public async Task Worker_Should_Run_On_StartupTest()
     {
-        var mockedScraperService = new Mock<IScrapperService>();
+        var mockedScraperService = new Mock<IScraperService>();
         _builder.ConfigureServices(services =>
         {
-            services.AddScoped<IScrapperService>(_ => mockedScraperService.Object);
-            services.AddSingleton<IHostedService, Worker>();
+            services.AddScoped<IScraperService>(_ => mockedScraperService.Object);
+            services.AddSingleton<IHostedService, ScraperWorker>();
         });
 
         var host = _builder.Build();
