@@ -43,6 +43,11 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             return new RegisterCommand(_telegramClient, _dbContext, _steamService, logger);
         }
 
+        if (name == CancelRegisterCommand.Name)
+        {
+            return new CancelRegisterCommand(_telegramClient, _dbContext);
+        }
+
         if (name == PlayCommand.Name)
         {
             var logger = _loggerFactory.CreateLogger<PlayCommand>();

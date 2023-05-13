@@ -46,6 +46,7 @@ How to:
         {
             new BotCommand {Command = "list", Description = "returns players ready to play"},
             new BotCommand {Command = "register", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /register 123"},
+            new BotCommand {Command = "cancel", Description = "cancel registration"},
             new BotCommand {Command = "play", Description = "provides a list of common games, search case-insensitive. Arguments: [category name: string]. Example /play \"Online pvp\" mmo"},
             new BotCommand {Command = "categories", Description = "list of game categories"},
             new BotCommand {Command = "sync", Description = "sync players & games. Arguments: [SteamPlayerId:int]. Example: /sync 123"},
