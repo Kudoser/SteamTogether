@@ -22,7 +22,7 @@ public class HelpCommand : ITelegramCommand
 How to:
 
 * Get SteamID: https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC
-* run /add SteamID
+* run /register SteamID
 * wait for the next sync (by default it runs every 15 minutes)
 * run /play
 
@@ -45,7 +45,7 @@ How to:
         return new[]
         {
             new BotCommand {Command = "list", Description = "returns players ready to play"},
-            new BotCommand {Command = "add", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /add 123"},
+            new BotCommand {Command = "register", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /register 123"},
             new BotCommand {Command = "play", Description = "provides a list of common games, search case-insensitive. Arguments: [category name: string]. Example /play \"Online pvp\" mmo"},
             new BotCommand {Command = "categories", Description = "list of game categories"},
             new BotCommand {Command = "sync", Description = "sync players & games. Arguments: [SteamPlayerId:int]. Example: /sync 123"},

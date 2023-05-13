@@ -10,13 +10,14 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<SteamPlayer> SteamPlayers { get; set; } = default!;
-    public DbSet<TelegramChat> TelegramChat { get; set; } = default!;
+    public DbSet<TelegramChatParticipant> TelegramChatParticipants { get; set; } = default!;
     public DbSet<SteamGame> SteamGames { get; set; } = default!;
     public DbSet<SteamGameCategory> SteamGamesCategories { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SteamPlayer>().HasKey(player => player.PlayerId);
+        
         modelBuilder
             .Entity<SteamPlayer>()
             .HasMany<SteamGame>(p => p.Games)
@@ -45,20 +46,20 @@ public class ApplicationDbContext : DbContext
                 }
             );
 
-        modelBuilder.Entity<TelegramChat>().HasKey(chat => chat.ChatId);
+        modelBuilder
+            .Entity<TelegramChatParticipant>()
+            .HasOne<SteamPlayer>(c => c.SteamPlayer);
 
         modelBuilder
-            .Entity<TelegramChat>()
-            .HasMany(e => e.Players)
-            .WithMany(e => e.TelegramChats)
-            .UsingEntity<Dictionary<string, object>>(
-                "SteamPlayerTelegramChat",
-                r => r.HasOne<SteamPlayer>().WithMany().HasForeignKey("PlayerId"),
-                l => l.HasOne<TelegramChat>().WithMany().HasForeignKey("ChatId"),
-                je =>
-                {
-                    je.HasKey("PlayerId", "ChatId");
-                }
-            );
+            .Entity<TelegramChatParticipant>()
+            .HasKey(c => new {c.ChatId, c.TelegramUserId, c.SteamPlayerId});
+            
+        modelBuilder
+            .Entity<TelegramChatParticipant>()
+            .HasIndex(c => new {c.ChatId, c.TelegramUserId});
+        
+        modelBuilder
+            .Entity<TelegramChatParticipant>()
+            .HasIndex(c => new {c.ChatId, c.SteamPlayerId});
     }
 }

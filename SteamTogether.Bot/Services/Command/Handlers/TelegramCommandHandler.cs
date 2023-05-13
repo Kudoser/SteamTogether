@@ -37,10 +37,10 @@ public class TelegramCommandHandler : ITelegramCommandHandler
             return new PlayersListCommand(_telegramClient, _dbContext, logger);
         }
 
-        if (name == AddPlayerListCommand.Name)
+        if (name == RegisterCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<AddPlayerListCommand>();
-            return new AddPlayerListCommand(_telegramClient, _dbContext, _steamService, logger);
+            var logger = _loggerFactory.CreateLogger<RegisterCommand>();
+            return new RegisterCommand(_telegramClient, _dbContext, _steamService, logger);
         }
 
         if (name == PlayCommand.Name)

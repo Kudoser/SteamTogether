@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SteamTogether.Core.Context;
+﻿using SteamTogether.Core.Context;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -25,7 +24,7 @@ public class PlayersListCommand : ITelegramCommand
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
-        var chat = await _dbContext.TelegramChat
+        /*var chat = await _dbContext.TelegramChat
             .Include(chat => chat.Players)
             .FirstOrDefaultAsync(chat => chat.ChatId == inputMessage.Chat.Id);
 
@@ -44,6 +43,6 @@ public class PlayersListCommand : ITelegramCommand
             chatId: inputMessage.Chat.Id,
             text: "The list is empty",
             cancellationToken: new CancellationToken()
-        );
+        );*/
     }
 }

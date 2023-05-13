@@ -28,7 +28,7 @@ public class PlayCommand : ITelegramCommand
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
-        var chatId = inputMessage.Chat.Id;
+        /*var chatId = inputMessage.Chat.Id;
 
         var chat = _dbContext.TelegramChat
             .Where(chat => chat.ChatId == chatId)
@@ -97,7 +97,7 @@ public class PlayCommand : ITelegramCommand
             (g, i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})"
         );
         messageLines.AddRange(lines);
-        await SendMessage(chatId, string.Join("\n", messageLines));
+        await SendMessage(chatId, string.Join("\n", messageLines));*/
     }
 
     private async Task SendMessage(long chatId, string message)
