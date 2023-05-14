@@ -89,7 +89,7 @@ public class ScraperTests
             .ReturnsAsync(new StoreAppDetailsDataModel
             {
                 Name = "First game name",
-                Categories = new StoreCategoryModel[] {new() {Id = 1}},
+                Categories = new StoreCategoryModel[] {new() {Id = 1, Description = "category1"}},
                 SteamAppId = 1
             });
 
@@ -98,7 +98,7 @@ public class ScraperTests
             .ReturnsAsync(new StoreAppDetailsDataModel
             {
                 Name = "Second game name",
-                Categories = new StoreCategoryModel[] {new() {Id = 1}},
+                Categories = new StoreCategoryModel[] {new() {Id = 1, Description = "category2"}},
                 SteamAppId = 2
             });
 
@@ -107,7 +107,7 @@ public class ScraperTests
             .ReturnsAsync(new StoreAppDetailsDataModel
             {
                 Name = "Third game name",
-                Categories = new StoreCategoryModel[] {new() {Id = 1}},
+                Categories = new StoreCategoryModel[] {new() {Id = 1, Description = "category3"}},
                 SteamAppId = 3
             });
 
