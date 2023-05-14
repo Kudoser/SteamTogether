@@ -31,12 +31,6 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
     public ITelegramCommand Resolve(string name)
     {
-        if (name == PlayersListCommand.Name)
-        {
-            var logger = _loggerFactory.CreateLogger<PlayersListCommand>();
-            return new PlayersListCommand(_telegramClient, _dbContext, logger);
-        }
-
         if (name == RegisterCommand.Name)
         {
             var logger = _loggerFactory.CreateLogger<RegisterCommand>();

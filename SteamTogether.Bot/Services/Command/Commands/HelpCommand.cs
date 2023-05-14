@@ -44,7 +44,6 @@ How to:
     {
         return new[]
         {
-            new BotCommand {Command = "list", Description = "returns players ready to play"},
             new BotCommand {Command = "register", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /register 123"},
             new BotCommand {Command = "cancel", Description = "cancel registration"},
             new BotCommand {Command = "pollstart", Description = "starts the poll \"who wants to play?\""},
