@@ -39,7 +39,7 @@ public class StartPollCommand : ITelegramCommand
         var message = await _telegramClient.SendPollAsync(
             chatId,
             "Who will play?",
-            new[] {"Me", "Pass"},
+            new[] {"I'm in", "Not today"},
             null,
             false,
             PollType.Regular
