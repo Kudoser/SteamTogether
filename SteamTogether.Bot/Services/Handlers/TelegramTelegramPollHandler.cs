@@ -1,26 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Models;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace SteamTogether.Bot.Services.Handlers;
 
 public class TelegramTelegramPollHandler : ITelegramPollHandler
 {
-    private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
 
-    public TelegramTelegramPollHandler(ITelegramBotClient telegramClient, ApplicationDbContext dbContext)
+    public TelegramTelegramPollHandler(ApplicationDbContext dbContext)
     {
-        _telegramClient = telegramClient;
         _dbContext = dbContext;
-    }
-
-    public Task HandlePollAsync(Poll poll, CancellationToken ct)
-    {
-        //throw new NotImplementedException();
-        return Task.CompletedTask;
     }
 
     public async Task HandlePollAnswer(PollAnswer pollAnswer, CancellationToken ct)
@@ -38,6 +29,7 @@ public class TelegramTelegramPollHandler : ITelegramPollHandler
             if (pollVote != null)
             {
                 _dbContext.TelegramPollVotes.Remove(pollVote);
+                await _dbContext.SaveChangesAsync(ct);
             }
         }
         else
@@ -51,9 +43,8 @@ public class TelegramTelegramPollHandler : ITelegramPollHandler
                     TelegramUserId = pollAnswer.User.Id
                 };
                 _dbContext.TelegramPollVotes.Add(pollVote);
+                await _dbContext.SaveChangesAsync(ct);
             }
         }
-
-        await _dbContext.SaveChangesAsync(ct);
     }
 }

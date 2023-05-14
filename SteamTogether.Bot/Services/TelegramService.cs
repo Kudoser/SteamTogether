@@ -46,7 +46,7 @@ public class TelegramService : ITelegramService
 
         var receiverOptions = new ReceiverOptions
         {
-            AllowedUpdates = new[] {UpdateType.Poll, UpdateType.Message, UpdateType.PollAnswer}
+            AllowedUpdates = new[] {UpdateType.Message, UpdateType.PollAnswer}
         };
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,
@@ -64,21 +64,14 @@ public class TelegramService : ITelegramService
     {
         ArgumentException.ThrowIfNullOrEmpty(BotName);
         
-        if (update.Message is { } message)
-        {
-            await HandleCommand(botClient, message, ct);
-            return;
-        }
-        
-        if (update.Poll is { } poll)
-        {
-            await _telegramPollHandler.HandlePollAsync(poll, ct);
-            return;
-        }
-
         if (update.PollAnswer is { } pollAnswer)
         {
             await _telegramPollHandler.HandlePollAnswer(pollAnswer, ct);
+        }
+        
+        if (update.Message is { } message)
+        {
+            await HandleCommand(botClient, message, ct);
             return;
         }
     }
