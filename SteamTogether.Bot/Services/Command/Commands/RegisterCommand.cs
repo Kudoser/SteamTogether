@@ -14,19 +14,16 @@ public class RegisterCommand : ITelegramCommand
     private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
     private readonly ISteamService _steamService;
-    private readonly ILogger<RegisterCommand> _logger;
 
     public RegisterCommand(
         ITelegramBotClient telegramClient,
         ApplicationDbContext dbContext,
-        ISteamService steamService,
-        ILogger<RegisterCommand> logger
+        ISteamService steamService
     )
     {
         _telegramClient = telegramClient;
         _dbContext = dbContext;
         _steamService = steamService;
-        _logger = logger;
     }
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)

@@ -12,17 +12,14 @@ public class StartPollCommand : ITelegramCommand
     
     private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
-    private readonly ILogger<StartPollCommand> _logger;
 
     public StartPollCommand(
         ITelegramBotClient telegramClient,
-        ApplicationDbContext dbContext,
-        ILogger<StartPollCommand> logger
+        ApplicationDbContext dbContext
     )
     {
         _telegramClient = telegramClient;
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)

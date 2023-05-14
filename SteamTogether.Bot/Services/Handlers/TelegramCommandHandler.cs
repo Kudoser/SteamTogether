@@ -33,8 +33,7 @@ public class TelegramCommandHandler : ITelegramCommandHandler
     {
         if (name == RegisterCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<RegisterCommand>();
-            return new RegisterCommand(_telegramClient, _dbContext, _steamService, logger);
+            return new RegisterCommand(_telegramClient, _dbContext, _steamService);
         }
 
         if (name == CancelRegisterCommand.Name)
@@ -44,13 +43,11 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
         if (name == StartPollCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<StartPollCommand>();
-            return new StartPollCommand(_telegramClient, _dbContext, logger);
+            return new StartPollCommand(_telegramClient, _dbContext);
         }
 
         if (name == EndPollCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<EndPollCommand>();
             return new EndPollCommand(_telegramClient, _dbContext);
         }
 
