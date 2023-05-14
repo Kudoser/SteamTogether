@@ -10,6 +10,5 @@ public class SteamPlayer
 
     public string? ApiKey { get; set; }
     public DateTime? LastSyncDateTime { get; set; }
-    public ICollection<TelegramChat> TelegramChats { get; } = new List<TelegramChat>();
     public ICollection<SteamGame> Games { get; } = new List<SteamGame>();
 }

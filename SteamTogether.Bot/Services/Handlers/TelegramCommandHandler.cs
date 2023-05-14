@@ -4,7 +4,7 @@ using SteamTogether.Core.Exceptions;
 using SteamTogether.Core.Services.Steam;
 using Telegram.Bot;
 
-namespace SteamTogether.Bot.Services.Command.Handlers;
+namespace SteamTogether.Bot.Services.Handlers;
 
 public class TelegramCommandHandler : ITelegramCommandHandler
 {
@@ -31,22 +31,24 @@ public class TelegramCommandHandler : ITelegramCommandHandler
 
     public ITelegramCommand Resolve(string name)
     {
-        if (name == PlayersListCommand.Name)
+        if (name == RegisterCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<PlayersListCommand>();
-            return new PlayersListCommand(_telegramClient, _dbContext, logger);
+            return new RegisterCommand(_telegramClient, _dbContext, _steamService);
         }
 
-        if (name == AddPlayerListCommand.Name)
+        if (name == CancelRegisterCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<AddPlayerListCommand>();
-            return new AddPlayerListCommand(_telegramClient, _dbContext, _steamService, logger);
+            return new CancelRegisterCommand(_telegramClient, _dbContext);
         }
 
-        if (name == PlayCommand.Name)
+        if (name == StartPollCommand.Name)
         {
-            var logger = _loggerFactory.CreateLogger<PlayCommand>();
-            return new PlayCommand(_telegramClient, _dbContext, logger);
+            return new StartPollCommand(_telegramClient, _dbContext);
+        }
+
+        if (name == EndPollCommand.Name)
+        {
+            return new EndPollCommand(_telegramClient, _dbContext);
         }
 
         if (name == HelpCommand.Name)

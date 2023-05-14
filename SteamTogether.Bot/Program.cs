@@ -2,8 +2,8 @@ using Microsoft.Extensions.Options;
 using SteamTogether.Bot;
 using SteamTogether.Bot.Options;
 using SteamTogether.Bot.Services;
-using SteamTogether.Bot.Services.Command.Handlers;
 using SteamTogether.Bot.Services.Command.Parser;
+using SteamTogether.Bot.Services.Handlers;
 using SteamTogether.Core;
 using SteamTogether.Core.Options;
 using SteamTogether.Core.Services.Steam;
@@ -70,6 +70,8 @@ var host = Host.CreateDefaultBuilder()
 
             services.AddScoped<ITelegramCommandParser, TelegramCommandParser>();
             services.AddScoped<ITelegramCommandHandler, TelegramCommandHandler>();
+            services.AddScoped<ITelegramPollHandler, TelegramTelegramPollHandler>();
+            
             services.AddScoped<ITelegramService, TelegramService>();
             services.AddScoped<ISteamService, SteamService>();
             services.AddTransient<IHealthCheckService, HealthCheckService>();

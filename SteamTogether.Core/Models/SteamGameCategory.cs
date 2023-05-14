@@ -6,6 +6,7 @@ public class SteamGameCategory
 {
     [Key]
     public uint CategoryId { get; set; }
+    [Required]
     public string? Description { get; set; }
     
     public ICollection<SteamGame> Games { get; } = new List<SteamGame>();
