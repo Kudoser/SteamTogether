@@ -1,6 +1,6 @@
 ﻿using SteamTogether.Bot.Services.Command.Commands;
-using SteamTogether.Bot.Services.Command.Handlers;
 using SteamTogether.Bot.Services.Command.Parser;
+using SteamTogether.Bot.Services.Handlers;
 using SteamTogether.Core.Exceptions;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -15,6 +15,7 @@ public class TelegramService : ITelegramService
     private readonly ITelegramBotClient _client;
     private readonly ITelegramCommandParser _telegramCommandParser;
     private readonly ITelegramCommandHandler _telegramCommandHandler;
+    private readonly ITelegramPollHandler _telegramPollHandler;
     private readonly ILogger<ITelegramService> _logger;
 
     private string? BotName { get; set; }
@@ -23,12 +24,14 @@ public class TelegramService : ITelegramService
         ITelegramBotClient client,
         ITelegramCommandParser telegramCommandParser,
         ITelegramCommandHandler telegramCommandHandler,
+        ITelegramPollHandler telegramPollHandler,
         ILogger<TelegramService> logger
     )
     {
         _client = client;
         _telegramCommandParser = telegramCommandParser;
         _telegramCommandHandler = telegramCommandHandler;
+        _telegramPollHandler = telegramPollHandler;
         _logger = logger;
     }
 
@@ -37,11 +40,14 @@ public class TelegramService : ITelegramService
         var me = await _client.GetMeAsync(cancellationToken);
         _logger.LogInformation("Connected to {BotName}, starting receiving messages...", me.Username);
         BotName = me.Username;
-        
-        _logger.LogInformation("Updating commands list");
-        await _client.SetMyCommandsAsync(HelpCommand.GetCommands(), cancellationToken:cancellationToken);
 
-        ReceiverOptions receiverOptions = new() { AllowedUpdates = Array.Empty<UpdateType>() };
+        _logger.LogInformation("Updating commands list");
+        await _client.SetMyCommandsAsync(HelpCommand.GetCommands(), cancellationToken: cancellationToken);
+
+        var receiverOptions = new ReceiverOptions
+        {
+            AllowedUpdates = new[] {UpdateType.Poll, UpdateType.Message, UpdateType.PollAnswer}
+        };
         await _client.ReceiveAsync(
             updateHandler: HandleUpdateAsync,
             pollingErrorHandler: HandlePollingErrorAsync,
@@ -53,31 +59,39 @@ public class TelegramService : ITelegramService
     private async Task HandleUpdateAsync(
         ITelegramBotClient botClient,
         Update update,
-        CancellationToken cancellationToken
+        CancellationToken ct
     )
     {
         ArgumentException.ThrowIfNullOrEmpty(BotName);
         
-        // Only process Message updates: https://core.telegram.org/bots/api#message
-        if (update.Message is not { } message)
+        if (update.Message is { } message)
+        {
+            await HandleCommand(botClient, message, ct);
             return;
-        // Only process text messages
-        if (message.Text is not { } messageText)
-            return;
-
-        var chatId = message.Chat.Id;
-        _logger.LogInformation(
-            "Received a '{MessageText}' message in chat {ChatId}",
-            message.Text,
-            message.Chat.Id
-        );
+        }
         
+        if (update.Poll is { } poll)
+        {
+            await _telegramPollHandler.HandlePollAsync(poll, ct);
+            return;
+        }
+
+        if (update.PollAnswer is { } pollAnswer)
+        {
+            await _telegramPollHandler.HandlePollAnswer(pollAnswer, ct);
+            return;
+        }
+    }
+    private async Task HandleCommand(ITelegramBotClient botClient, Message message, CancellationToken ct)
+    {
+        var chatId = message.Chat.Id;
+
         var botCommand = message.Entities?.FirstOrDefault(e => e.Type == MessageEntityType.BotCommand);
         if (botCommand == null)
         {
             return;
         }
-        
+
         try
         {
             var parsedResult = _telegramCommandParser.Parse(message.Text, BotName);
@@ -88,7 +102,7 @@ public class TelegramService : ITelegramService
 
             var command = _telegramCommandHandler.Resolve(parsedResult.CommandName);
 
-            await command.ExecuteAsync(update.Message, parsedResult.Arguments);
+            await command.ExecuteAsync(message, parsedResult.Arguments);
         }
         catch (UnknownCommandException e)
         {
@@ -96,7 +110,7 @@ public class TelegramService : ITelegramService
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Can't recognize command",
-                cancellationToken: cancellationToken
+                cancellationToken: ct
             );
         }
         catch (Exception e)
@@ -105,7 +119,7 @@ public class TelegramService : ITelegramService
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: $"An error occurred during command execution: {e.Message}",
-                cancellationToken: cancellationToken
+                cancellationToken: ct
             );
         }
     }

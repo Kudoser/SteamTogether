@@ -14,5 +14,6 @@ public class TelegramChatParticipant
     [Required]
     public long TelegramUserId { get; set; }
     
-    public SteamPlayer? SteamPlayer { get; }
+    [ForeignKey("SteamPlayerId")]
+    public SteamPlayer SteamPlayer { get; set; }
 }

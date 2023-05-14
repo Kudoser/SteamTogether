@@ -6,19 +6,20 @@ using Telegram.Bot.Types.Enums;
 
 namespace SteamTogether.Bot.Services.Command.Commands;
 
-public class PlayCommand : ITelegramCommand
+public class EndPollCommand : ITelegramCommand
 {
-    public const string Name = "play";
-    private const string DefaultGameCategory = "Co-op";
-    
+    public const string Name = "pollend";
+
     private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
-    private readonly ILogger<PlayCommand> _logger;
+    private readonly ILogger<EndPollCommand> _logger;
 
-    public PlayCommand(
+    private const string DefaultGameCategory = "Co-op";
+
+    public EndPollCommand(
         ITelegramBotClient telegramClient,
         ApplicationDbContext dbContext,
-        ILogger<PlayCommand> logger
+        ILogger<EndPollCommand> logger
     )
     {
         _telegramClient = telegramClient;
@@ -28,17 +29,30 @@ public class PlayCommand : ITelegramCommand
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)
     {
-        /*var chatId = inputMessage.Chat.Id;
+        var chatId = inputMessage.Chat.Id;
 
-        var chat = _dbContext.TelegramChat
-            .Where(chat => chat.ChatId == chatId)
-            .Include(chat => chat.Players)
-            .ThenInclude(player => player.Games)
-            .ThenInclude(game => game.Categories)
+        var telegramPoll = _dbContext.TelegramPolls
+            .Where(p => p.ChatId == chatId)
+            .Include(p => p.TelegramPollVotes)
             .FirstOrDefault();
 
-        ArgumentNullException.ThrowIfNull(chat);
-        
+        if (telegramPoll == null)
+        {
+            await SendMessageAsync(chatId, "No polls started");
+            return;
+        }
+
+        var poll = await _telegramClient.StopPollAsync(
+            chatId,
+            telegramPoll.MessageId
+        );
+
+        if (poll.TotalVoterCount <= 0)
+        {
+            await SendMessageAsync(chatId, "Nobody voted");
+            return;
+        }
+
         var categoryNames = args.Any()
             ? args
             : new[] {DefaultGameCategory};
@@ -50,25 +64,34 @@ public class PlayCommand : ITelegramCommand
         var categoryIds = categories
             .Select(c => c.CategoryId)
             .ToArray();
-        
+
         if (!categoryIds.Any())
         {
-            await SendMessage(chatId, "Can't find such categories");
+            await SendMessageAsync(chatId, "Can't find such categories");
             return;
         }
 
-        var games = chat.Players
+        var userIds = telegramPoll.TelegramPollVotes
+            .Select(p => p.TelegramUserId)
+            .ToArray();
+
+        var games = _dbContext.TelegramChatParticipants
+            .Where(p => userIds.Contains(p.TelegramUserId))
+            .Include(p => p.SteamPlayer)
+            .ThenInclude(sp => sp.Games)
             .SelectMany(
-                player => player.Games.Where(game => game.Categories.Any(c => categoryIds.Contains(c.CategoryId))),
-                (player, game) =>
+                participant =>
+                    participant.SteamPlayer.Games.Where(game =>
+                        game.Categories.Any(c => categoryIds.Contains(c.CategoryId))),
+                (participant, game) =>
                     new
                     {
-                        PlayerName = player.Name,
+                        PlayerName = participant.SteamPlayer.Name,
                         GameName = game.Name,
                         game.GameId
                     }
             )
-            .GroupBy(p => new { p.GameId, p.GameName })
+            .GroupBy(p => new {p.GameId, p.GameName})
             .Select(
                 g =>
                     new
@@ -79,11 +102,12 @@ public class PlayCommand : ITelegramCommand
                     }
             )
             .OrderByDescending(x => x.Count)
-            .Take(15);
+            .Take(15)
+            .ToArray();
 
         if (!games.Any())
         {
-            await SendMessage(chatId, "No games found");
+            await SendMessageAsync(chatId, "No games found");
             return;
         }
 
@@ -92,15 +116,19 @@ public class PlayCommand : ITelegramCommand
             .ToArray();
 
         var messageLines = new List<string> {$"Categories: {string.Join(",", categoryLines)}"};
-        
+
         var lines = games.Select(
             (g, i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})"
-        );
+        ).ToArray();
+
         messageLines.AddRange(lines);
-        await SendMessage(chatId, string.Join("\n", messageLines));*/
+        await SendMessageAsync(chatId, string.Join("\n", messageLines));
+
+        _dbContext.TelegramPolls.Remove(telegramPoll);
+        await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SendMessage(long chatId, string message)
+    private async Task SendMessageAsync(long chatId, string message)
     {
         await _telegramClient.SendTextMessageAsync(
             parseMode: ParseMode.Html,

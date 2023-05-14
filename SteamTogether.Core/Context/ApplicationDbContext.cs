@@ -13,11 +13,30 @@ public class ApplicationDbContext : DbContext
     public DbSet<TelegramChatParticipant> TelegramChatParticipants { get; set; } = default!;
     public DbSet<SteamGame> SteamGames { get; set; } = default!;
     public DbSet<SteamGameCategory> SteamGamesCategories { get; set; } = default!;
+    public DbSet<TelegramPoll> TelegramPolls { get; set; } = default!;
+    public DbSet<TelegramPollVote> TelegramPollVotes { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SteamPlayer>().HasKey(player => player.PlayerId);
         
+        modelBuilder.Entity<TelegramPoll>()
+            .HasIndex(poll => new {poll.ChatId})
+            .IsUnique();
+        
+        modelBuilder.Entity<TelegramPollVote>()
+            .HasIndex(vote => new {vote.PollId, vote.TelegramUserId})
+            .IsUnique();
+
+        modelBuilder.Entity<TelegramPollVote>()
+            .HasIndex(vote => new {vote.PollId});
+
+        modelBuilder.Entity<TelegramPoll>()
+            .HasMany(p => p.TelegramPollVotes)
+            .WithOne(p => p.TelegramPoll)
+            .HasForeignKey(pv => pv.PollId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder
             .Entity<SteamPlayer>()
             .HasMany<SteamGame>(p => p.Games)
