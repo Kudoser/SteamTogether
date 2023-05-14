@@ -9,8 +9,6 @@ public class SteamPlayer
     public string? Name { get; set; }
 
     public string? ApiKey { get; set; }
-    
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public DateTime? LastSyncDateTime { get; set; }
     public ICollection<SteamGame> Games { get; } = new List<SteamGame>();
 }
