@@ -52,7 +52,7 @@ How to:
             new BotCommand {Command = "categories", Description = "list of game categories"},
             new BotCommand {Command = "sync", Description = "sync players & games. Arguments: [SteamPlayerId:int]. Example: /sync 123"},
             new BotCommand {Command = "status", Description = "status of the scraper sync"},
-            new BotCommand {Command = "help", Description = ""}
+            new BotCommand {Command = "help", Description = "help command"}
         };
     }
 }
