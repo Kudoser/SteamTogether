@@ -23,8 +23,9 @@ How to:
 
 * Get SteamID: https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC
 * run /register SteamID
-* wait for the next sync (by default it runs every 15 minutes)
-* run /play
+* run /sync or wait for the next sync (by default it runs every 15 minutes) 
+* run /pollstart to start poll
+* run pollend [category names] separated by comma, example pollend mmo, co-op
 
 {commandsAsString}";
         
@@ -50,7 +51,8 @@ How to:
             new BotCommand {Command = "pollend", Description = "ends the poll and lists common games to play"},
             new BotCommand {Command = "categories", Description = "list of game categories"},
             new BotCommand {Command = "sync", Description = "sync players & games. Arguments: [SteamPlayerId:int]. Example: /sync 123"},
-            new BotCommand {Command = "status", Description = "status of the scraper sync"}
+            new BotCommand {Command = "status", Description = "status of the scraper sync"},
+            new BotCommand {Command = "help", Description = ""}
         };
     }
 }
