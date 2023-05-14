@@ -12,19 +12,16 @@ public class EndPollCommand : ITelegramCommand
 
     private readonly ITelegramBotClient _telegramClient;
     private readonly ApplicationDbContext _dbContext;
-    private readonly ILogger<EndPollCommand> _logger;
 
     private const string DefaultGameCategory = "Co-op";
 
     public EndPollCommand(
         ITelegramBotClient telegramClient,
-        ApplicationDbContext dbContext,
-        ILogger<EndPollCommand> logger
+        ApplicationDbContext dbContext
     )
     {
         _telegramClient = telegramClient;
         _dbContext = dbContext;
-        _logger = logger;
     }
 
     public async Task ExecuteAsync(Message inputMessage, string[] args)

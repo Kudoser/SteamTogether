@@ -57,7 +57,7 @@ public class TelegramCommandHandler : ITelegramCommandHandler
         if (name == EndPollCommand.Name)
         {
             var logger = _loggerFactory.CreateLogger<EndPollCommand>();
-            return new EndPollCommand(_telegramClient, _dbContext, logger);
+            return new EndPollCommand(_telegramClient, _dbContext);
         }
 
         if (name == HelpCommand.Name)
