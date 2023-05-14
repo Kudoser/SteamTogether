@@ -22,9 +22,10 @@ public class HelpCommand : ITelegramCommand
 How to:
 
 * Get SteamID: https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC
-* run /add SteamID
-* wait for the next sync (by default it runs every 15 minutes)
-* run /play
+* run /register SteamID
+* run /sync or wait for the next sync (by default it runs every 15 minutes) 
+* run /pollstart to start poll
+* run /pollend [category names] separated by comma, example: /pollend mmo, co-op
 
 {commandsAsString}";
         
@@ -44,12 +45,14 @@ How to:
     {
         return new[]
         {
-            new BotCommand {Command = "list", Description = "returns players ready to play"},
-            new BotCommand {Command = "add", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /add 123"},
-            new BotCommand {Command = "play", Description = "provides a list of common multiplayer games, search case-insensitive. Arguments: [category name: string]. Example /play \"Online pvp\" mmo"},
+            new BotCommand {Command = "register", Description = "register to play. Arguments: [SteamPlayerId:int]. Example: /register 123"},
+            new BotCommand {Command = "cancel", Description = "cancel registration"},
+            new BotCommand {Command = "pollstart", Description = "starts the poll \"who wants to play?\""},
+            new BotCommand {Command = "pollend", Description = "ends the poll and lists common games to play"},
             new BotCommand {Command = "categories", Description = "list of game categories"},
             new BotCommand {Command = "sync", Description = "sync players & games. Arguments: [SteamPlayerId:int]. Example: /sync 123"},
-            new BotCommand {Command = "status", Description = "status of the scraper sync"}
+            new BotCommand {Command = "status", Description = "status of the scraper sync"},
+            new BotCommand {Command = "help", Description = "help command"}
         };
     }
 }

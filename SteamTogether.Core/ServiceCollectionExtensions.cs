@@ -14,7 +14,8 @@ public static class ServiceCollectionExtensions
             (provider, dbOptions) =>
         {
             var opts = provider.GetRequiredService<IOptions<DatabaseOptions>>();
-            dbOptions.UseSqlite(opts.Value.ConnectionString);
+            dbOptions.UseSqlite(opts.Value.ConnectionString, 
+                o => o.MinBatchSize(5));
         });
         
         return services;

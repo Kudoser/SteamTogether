@@ -11,14 +11,29 @@ using SteamTogether.Core.Context;
 namespace SteamTogether.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230410200804_SteamPlayerNameNullable")]
-    partial class SteamPlayerNameNullable
+    [Migration("20230513182207_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
+
+            modelBuilder.Entity("SteamGameSteamCategory", b =>
+                {
+                    b.Property<uint>("GameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GameId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("SteamGameSteamCategory");
+                });
 
             modelBuilder.Entity("SteamPlayerSteamGame", b =>
                 {
@@ -35,21 +50,6 @@ namespace SteamTogether.Core.Migrations
                     b.ToTable("SteamPlayerSteamGame");
                 });
 
-            modelBuilder.Entity("SteamPlayerTelegramChat", b =>
-                {
-                    b.Property<ulong>("PlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("ChatId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("PlayerId", "ChatId");
-
-                    b.HasIndex("ChatId");
-
-                    b.ToTable("SteamPlayerTelegramChat");
-                });
-
             modelBuilder.Entity("SteamTogether.Core.Models.SteamGame", b =>
                 {
                     b.Property<uint>("GameId")
@@ -58,9 +58,6 @@ namespace SteamTogether.Core.Migrations
 
                     b.Property<DateTime?>("LastSyncDateTime")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("Multiplayer")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -73,6 +70,20 @@ namespace SteamTogether.Core.Migrations
                     b.ToTable("SteamGames");
                 });
 
+            modelBuilder.Entity("SteamTogether.Core.Models.SteamGameCategory", b =>
+                {
+                    b.Property<uint>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("SteamGamesCategories");
+                });
+
             modelBuilder.Entity("SteamTogether.Core.Models.SteamPlayer", b =>
                 {
                     b.Property<ulong>("PlayerId")
@@ -83,6 +94,7 @@ namespace SteamTogether.Core.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("LastSyncDateTime")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -93,15 +105,41 @@ namespace SteamTogether.Core.Migrations
                     b.ToTable("SteamPlayers");
                 });
 
-            modelBuilder.Entity("SteamTogether.Core.Models.TelegramChat", b =>
+            modelBuilder.Entity("SteamTogether.Core.Models.TelegramChatParticipant", b =>
                 {
                     b.Property<long>("ChatId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ChatId");
+                    b.Property<long>("TelegramUserId")
+                        .HasColumnType("INTEGER");
 
-                    b.ToTable("TelegramChat");
+                    b.Property<ulong>("SteamPlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ChatId", "TelegramUserId", "SteamPlayerId");
+
+                    b.HasIndex("SteamPlayerId");
+
+                    b.HasIndex("ChatId", "SteamPlayerId");
+
+                    b.HasIndex("ChatId", "TelegramUserId");
+
+                    b.ToTable("TelegramChatParticipants");
+                });
+
+            modelBuilder.Entity("SteamGameSteamCategory", b =>
+                {
+                    b.HasOne("SteamTogether.Core.Models.SteamGameCategory", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SteamTogether.Core.Models.SteamGame", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SteamPlayerSteamGame", b =>
@@ -119,19 +157,15 @@ namespace SteamTogether.Core.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SteamPlayerTelegramChat", b =>
+            modelBuilder.Entity("SteamTogether.Core.Models.TelegramChatParticipant", b =>
                 {
-                    b.HasOne("SteamTogether.Core.Models.TelegramChat", null)
+                    b.HasOne("SteamTogether.Core.Models.SteamPlayer", "SteamPlayer")
                         .WithMany()
-                        .HasForeignKey("ChatId")
+                        .HasForeignKey("SteamPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SteamTogether.Core.Models.SteamPlayer", null)
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("SteamPlayer");
                 });
 #pragma warning restore 612, 618
         }

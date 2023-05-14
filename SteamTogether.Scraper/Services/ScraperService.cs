@@ -161,19 +161,13 @@ public class ScraperService : IScraperService
                 return null;
             }
 
-            var multiplayer = storeApp.Categories.Any(
-                // @todo move constants
-                category => new uint[] {1, 9, 38}.Contains(category.Id)
-            );
-
             if (game == null)
             {
                 game = new SteamGame
                 {
                     GameId = gameId,
                     SteamAppId = storeApp.SteamAppId,
-                    Name = storeApp.Name,
-                    Multiplayer = multiplayer
+                    Name = storeApp.Name
                 };
 
                 _logger.LogInformation(
@@ -188,7 +182,6 @@ public class ScraperService : IScraperService
             {
                 game.SteamAppId = storeApp.SteamAppId;
                 game.Name = storeApp.Name;
-                game.Multiplayer = multiplayer;
 
                 _logger.LogInformation(
                     "Updating GameId={GameId}, Name={Name}",
