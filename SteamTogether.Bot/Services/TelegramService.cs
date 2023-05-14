@@ -72,7 +72,6 @@ public class TelegramService : ITelegramService
         if (update.Message is { } message)
         {
             await HandleCommand(botClient, message, ct);
-            return;
         }
     }
     private async Task HandleCommand(ITelegramBotClient botClient, Message message, CancellationToken ct)

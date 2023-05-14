@@ -79,7 +79,6 @@ public class RegisterCommand : ITelegramCommand
             return;
         }
 
-        // @todo add public API Key support
         if (steamWebResponse.Data.ProfileVisibility != ProfileVisibility.Public)
         {
             await SendMessage(
