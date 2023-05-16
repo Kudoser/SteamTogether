@@ -18,8 +18,6 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SteamPlayer>().HasKey(player => player.PlayerId);
-        
         modelBuilder.Entity<TelegramPoll>()
             .HasIndex(poll => new {poll.ChatId})
             .IsUnique();
@@ -39,17 +37,23 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder
             .Entity<SteamPlayer>()
-            .HasMany<SteamGame>(p => p.Games)
-            .WithMany(g => g.Players)
-            .UsingEntity<Dictionary<string, object>>(
-                "SteamPlayerSteamGame",
-                r => r.HasOne<SteamGame>().WithMany().HasForeignKey("GameId"),
-                l => l.HasOne<SteamPlayer>().WithMany().HasForeignKey("PlayerId"),
-                je =>
-                {
-                    je.HasKey("PlayerId", "GameId");
-                }
-            );
+            .HasMany<PlayerGame>(p => p.PlayerGames);
+
+        modelBuilder
+            .Entity<SteamGame>()
+            .HasMany<PlayerGame>(g => g.PlayerGames);
+
+        modelBuilder
+            .Entity<PlayerGame>()
+            .HasOne<SteamPlayer>(p => p.Player);
+        
+        modelBuilder
+            .Entity<PlayerGame>()
+            .HasOne<SteamGame>(g => g.Game);
+
+        modelBuilder
+            .Entity<PlayerGame>()
+            .HasKey(pg => new {pg.GameId, pg.PlayerId});
         
         modelBuilder
             .Entity<SteamGame>()

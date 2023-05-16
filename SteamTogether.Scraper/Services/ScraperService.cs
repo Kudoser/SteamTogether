@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Steam.Models.SteamCommunity;
 using Steam.Models.SteamStore;
 using SteamTogether.Core.Context;
 using SteamTogether.Core.Models;
@@ -57,7 +58,8 @@ public class ScraperService : IScraperService
             {
                 steamPlayers = _dbContext.SteamPlayers
                     .Where(p => playerIds.Contains(p.PlayerId))
-                    .Include(player => player.Games)
+                    .Include(player => player.PlayerGames)
+                    .ThenInclude(p => p.Game)
                     .ToArray();
             }
             else
@@ -65,7 +67,8 @@ public class ScraperService : IScraperService
                 var syncDate = _dateTimeService.UtcNow.AddSeconds(-_options.PlayerSyncPeriodSeconds);
                 steamPlayers = _dbContext.SteamPlayers
                     .Where(p => p.LastSyncDateTime == null || p.LastSyncDateTime < syncDate)
-                    .Include(player => player.Games)
+                    .Include(player => player.PlayerGames)
+                    .ThenInclude(p => p.Game)
                     .Take(_options.PlayersPerRun)
                     .ToArray();
             }
@@ -109,37 +112,42 @@ public class ScraperService : IScraperService
     {
         _logger.LogInformation("Processing player Name={Name}", player.Name);
         var ownedGamesRequest = await _steamService.GetOwnedGamesAsync(player.PlayerId);
-        var ownedGameIds = ownedGamesRequest.Data.OwnedGames
-            .Select(o => o.AppId)
-            .ToArray();
         
-        foreach (var ownedGameId in ownedGameIds)
+        foreach (var ownedGame in ownedGamesRequest.Data.OwnedGames)
         {
-            await SyncGameAsync(player, ownedGameId);
+            await SyncGameAsync(player, ownedGame);
         }
 
         player.LastSyncDateTime = _dateTimeService.UtcNow;
     }
 
-    private async Task SyncGameAsync(SteamPlayer player, uint ownedGameId)
+    private async Task SyncGameAsync(SteamPlayer player, OwnedGameModel ownedGame)
     {
-        _logger.LogInformation("Start sync for game Id={GameId}", ownedGameId);
+        _logger.LogInformation("Start sync for game Id={GameId}", ownedGame.AppId);
         
-        var game = await InsertOrUpdateGameAsync(ownedGameId);
+        var game = await InsertOrUpdateGameAsync(ownedGame.AppId);
         if (game == null)
         {
             return;
         }
-        
-        var connected = player.Games.Select(g => g.GameId).Contains(game.GameId);
-        if (!connected)
+
+        var connected = player.PlayerGames.FirstOrDefault(g => g.GameId == game.GameId);
+        if (connected == null)
         {
             _logger.LogInformation(
                 "Adding GameId={GameId} to player {Name}",
-                ownedGameId,
+                ownedGame.AppId,
                 player.Name
             );
-            player.Games.Add(game);
+            var playerGameRelation = new PlayerGame
+            {
+                GameId = game.GameId,
+                PlayerId = player.PlayerId,
+                PlaytimeForever = ownedGame.PlaytimeForever,
+                PlaytimeLastTwoWeeks = ownedGame.PlaytimeForever
+            };
+            
+            player.PlayerGames.Add(playerGameRelation);
         }
     }
 

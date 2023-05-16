@@ -75,17 +75,17 @@ public class EndPollCommand : ITelegramCommand
         var games = _dbContext.TelegramChatParticipants
             .Where(p => userIds.Contains(p.TelegramUserId))
             .Include(p => p.SteamPlayer)
-            .ThenInclude(sp => sp.Games)
+            .ThenInclude(sp => sp.PlayerGames)
+            .ThenInclude(pg => pg.Game)
+            .ThenInclude(g => g.Categories)
             .SelectMany(
-                participant =>
-                    participant.SteamPlayer.Games.Where(game =>
-                        game.Categories.Any(c => categoryIds.Contains(c.CategoryId))),
-                (participant, game) =>
+                participant => participant.SteamPlayer.PlayerGames.Where(pg => pg.Game.Categories.Any(c => categoryIds.Contains(c.CategoryId))),
+                (participant, pg) =>
                     new
                     {
                         PlayerName = participant.SteamPlayer.Name,
-                        GameName = game.Name,
-                        game.GameId
+                        GameName = pg.Game.Name,
+                        pg.GameId
                     }
             )
             .GroupBy(p => new {p.GameId, p.GameName})

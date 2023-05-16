@@ -129,13 +129,14 @@ public class ScraperTests
         await scraper.RunSync();
 
         var player = dbContext.SteamPlayers
-            .Include(player => player.Games)
+            .Include(player => player.PlayerGames)
+            .ThenInclude(pg => pg.Game)
             .FirstOrDefault(player => player.PlayerId == 1);
         
         Assert.NotNull(player);
-        Assert.Equal(3, player.Games.Count);
-        Assert.Equal("First game name", player.Games.FirstOrDefault(game => game.SteamAppId == 1)?.Name);
-        Assert.Equal("Second game name", player.Games.FirstOrDefault(game => game.SteamAppId == 2)?.Name);
-        Assert.Equal("Third game name", player.Games.FirstOrDefault(game => game.SteamAppId == 3)?.Name);
+        Assert.Equal(3, player.PlayerGames.Count);
+        Assert.Equal("First game name", player.PlayerGames.FirstOrDefault(pg => pg.Game.SteamAppId == 1)?.Game.Name);
+        Assert.Equal("Second game name", player.PlayerGames.FirstOrDefault(pg => pg.Game.SteamAppId == 2)?.Game.Name);
+        Assert.Equal("Third game name", player.PlayerGames.FirstOrDefault(pg => pg.Game.SteamAppId == 3)?.Game.Name);
     }
 }

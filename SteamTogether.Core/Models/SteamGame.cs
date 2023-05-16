@@ -10,6 +10,6 @@ public class SteamGame
     [Required]
     public string? Name { get; set; }
     public DateTime? LastSyncDateTime { get; set; }
-    public ICollection<SteamPlayer> Players { get; } = new List<SteamPlayer>();
+    public ICollection<PlayerGame> PlayerGames { get; } = new List<PlayerGame>();
     public ICollection<SteamGameCategory> Categories { get; set; } = new List<SteamGameCategory>();
 }
