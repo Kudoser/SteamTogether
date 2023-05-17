@@ -29,7 +29,7 @@ public class SteamService : ISteamService
     {
         var httpClient = _httpClientFactory.CreateClient(nameof(SteamStore));
         var storeInterface = _steamInterfaceFactory.CreateSteamStoreInterface(httpClient);
-        return await storeInterface.GetStoreAppDetailsAsync(gameId);
+        return await storeInterface.GetStoreAppDetailsAsync(gameId, "", "en");
     }
 
     public async Task<ISteamWebResponse<PlayerSummaryModel>> GetPlayerSummaryAsync(ulong playerId)
