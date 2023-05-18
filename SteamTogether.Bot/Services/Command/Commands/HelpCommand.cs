@@ -25,7 +25,7 @@ How to:
 * run /register SteamID
 * run /sync or wait for the next sync (by default it runs every 15 minutes) 
 * run /pollstart to start poll
-* run /pollend [category names] separated by comma, example: /pollend mmo, co-op
+* run /pollend [category names] separated by comma, example: /pollend mmo co-op ""Online co-op""
 
 {commandsAsString}";
         
