@@ -105,7 +105,7 @@ public class EndPollCommand : ITelegramCommand
         var lines = games.Select(
             (g, i) =>
             {
-                var avgTime = TimeSpan.FromSeconds(g.TotalSeconds.Average()).ToString(@"dd\d\ hh\h\ mm\s");
+                var avgTime = TimeSpan.FromSeconds(g.TotalSeconds.Average()).ToString(@"dd\d\ hh\h\ mm\m");
                 return $"{i + 1}. {g.Name}, count: {g.Count}, avg time: {avgTime} ({string.Join(",", g.PlayerNames)})";
             }).ToArray();
 
