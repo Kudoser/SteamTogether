@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SteamTogether.Bot.Models;
 using SteamTogether.Core.Context;
+using SteamTogether.Core.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -43,6 +45,9 @@ public class EndPollCommand : ITelegramCommand
             chatId,
             telegramPoll.MessageId
         );
+        
+        _dbContext.TelegramPolls.Remove(telegramPoll);
+        await _dbContext.SaveChangesAsync();
 
         if (poll.TotalVoterCount <= 0)
         {
@@ -69,60 +74,43 @@ public class EndPollCommand : ITelegramCommand
         }
 
         var userIds = telegramPoll.TelegramPollVotes
+            .Where(pv => pv.PollId == poll.Id)
             .Select(p => p.TelegramUserId)
             .ToArray();
 
-        var games = _dbContext.TelegramChatParticipants
-            .Where(p => userIds.Contains(p.TelegramUserId))
-            .Include(p => p.SteamPlayer)
-            .ThenInclude(sp => sp.PlayerGames)
-            .ThenInclude(pg => pg.Game)
-            .ThenInclude(g => g.Categories)
-            .SelectMany(
-                participant => participant.SteamPlayer.PlayerGames.Where(pg => pg.Game.Categories.Any(c => categoryIds.Contains(c.CategoryId))),
-                (participant, pg) =>
-                    new
-                    {
-                        PlayerName = participant.SteamPlayer.Name,
-                        GameName = pg.Game.Name,
-                        pg.GameId
-                    }
-            )
-            .GroupBy(p => new {p.GameId, p.GameName})
-            .Select(
-                g =>
-                    new
-                    {
-                        Name = g.Key.GameName,
-                        Count = g.Count(),
-                        Players = string.Join(",", g.Select(p => p.PlayerName))
-                    }
-            )
-            .OrderByDescending(x => x.Count)
-            .Take(15)
-            .ToArray();
+        if (!userIds.Any())
+        {
+            await SendMessageAsync(chatId, "No users found");
+            return;
+        }
 
+        var games = new GameCollector(_dbContext).GetGroupGames(userIds, categoryIds, 15);
         if (!games.Any())
         {
             await SendMessageAsync(chatId, "No games found");
             return;
         }
 
+        var lines = RenderLines(games, categories);
+        await SendMessageAsync(chatId, string.Join("\n", lines));
+    }
+
+    private List<string> RenderLines(GroupedGameResult[] games, SteamGameCategory[] categories)
+    {
         var categoryLines = categories
             .Select(c => $"{c.Description}")
             .ToArray();
 
         var messageLines = new List<string> {$"Categories: {string.Join(",", categoryLines)}"};
-
         var lines = games.Select(
-            (g, i) => $"{i + 1}. {g.Name}, count: {g.Count} ({g.Players})"
-        ).ToArray();
+            (g, i) =>
+            {
+                var avgTime = TimeSpan.FromSeconds(g.TotalSeconds.Average()).ToString(@"dd\d\ hh\h\ mm\s");
+                return $"{i + 1}. {g.Name}, count: {g.Count}, avg time: {avgTime} ({string.Join(",", g.PlayerNames)})";
+            }).ToArray();
 
         messageLines.AddRange(lines);
-        await SendMessageAsync(chatId, string.Join("\n", messageLines));
-
-        _dbContext.TelegramPolls.Remove(telegramPoll);
-        await _dbContext.SaveChangesAsync();
+        return messageLines;
     }
 
     private async Task SendMessageAsync(long chatId, string message)

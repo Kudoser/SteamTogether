@@ -49,7 +49,7 @@ public class ScraperTests
                 services
                     .AddLogging(x => x.AddConsole())
                     .AddDbContext<ApplicationDbContext>(
-                        opt => { opt.UseInMemoryDatabase("test.db"); });
+                        opt => { opt.UseInMemoryDatabase($"{nameof(ScraperTests)}.db"); });
             });
     }
 

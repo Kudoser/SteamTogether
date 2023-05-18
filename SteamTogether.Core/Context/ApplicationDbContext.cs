@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<SteamPlayer> SteamPlayers { get; set; } = default!;
     public DbSet<TelegramChatParticipant> TelegramChatParticipants { get; set; } = default!;
     public DbSet<SteamGame> SteamGames { get; set; } = default!;
+    public DbSet<PlayerGame> PlayerGame { get; set; } = default!;
     public DbSet<SteamGameCategory> SteamGamesCategories { get; set; } = default!;
     public DbSet<TelegramPoll> TelegramPolls { get; set; } = default!;
     public DbSet<TelegramPollVote> TelegramPollVotes { get; set; } = default!;
