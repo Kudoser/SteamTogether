@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.4
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS sdk
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS sdk
 
 
-FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime
+FROM mcr.microsoft.com/dotnet/runtime:9.0 AS runtime
 # Install curl for the health check
 RUN apt-get update && apt-get install -y \
     curl \
