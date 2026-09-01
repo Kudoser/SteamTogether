@@ -7,7 +7,7 @@
       "commands": ["dotnet-csharpier"]
     },
     "dotnet-ef": {
-      "version": "7.0.5",
+      "version": "7.0.20",
       "commands": ["dotnet-ef"]
     },
     "dotnet-coverage": {
