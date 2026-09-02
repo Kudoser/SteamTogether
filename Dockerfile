@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.27
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS sdk
 
